@@ -1,0 +1,3 @@
+site_name: whatwedoSearchBundle
+theme: readthedocs
+docs_dir: .

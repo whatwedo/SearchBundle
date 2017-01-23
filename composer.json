@@ -1,0 +1,32 @@
+{
+    "name": "whatwedo/search-bundle",
+    "type": "symfony-bundle",
+    "description": "Full text search on Doctrine entities without external dependencies.",
+    "license": "MIT",
+    "homepage": "https://doc.whatwedo.ch/whatwedo/searchbundle",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Ueli Banholzer",
+            "email": "ueli@whatwedo.ch"
+        },
+        {
+            "name": "Felix Imobersteg",
+            "email": "felix@whatwedo.ch"
+        },
+        {
+            "name": "Nicolo Singer",
+            "email": "nicolo@whatwedo.ch"
+        }
+    ],
+    "require": {
+        "php":                      ">=5.6",
+        "symfony/symfony":          "~3.0",
+        "whatwedo/core-bundle":     "^0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "whatwedo\\SearchBundle\\": ""
+        }
+    }
+}
