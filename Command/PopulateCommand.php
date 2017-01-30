@@ -112,7 +112,6 @@ class PopulateCommand extends BaseCommand
 
         // Get entities
         $entities = $this->em->getRepository($entityName)->findAll();
-        $this->gc();
 
         // Initialize progress bar
         $progress = new ProgressBar($this->output, count($entities) * count($indexes));
@@ -138,9 +137,8 @@ class PopulateCommand extends BaseCommand
                     $this->em->flush($entry);
                 }
 
-                // Run garbage collector and update progress bar every 200 iterations
+                // Update progress bar every 200 iterations
                 if ($i % 200 == 0) {
-                    $this->gc();
                     $progress->setProgress($i);
                 }
                 $i ++;
