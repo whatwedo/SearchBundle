@@ -129,6 +129,7 @@ class IndexListener implements EventSubscriber
             if (!$em->getMetadataFactory()->hasMetadataFor($class)) {
                 continue;
             }
+
             $indexes = $this->indexManager->getIndexesOfEntity($class);
             $idMethod = $this->indexManager->getIdMethod($class);
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
@@ -147,6 +148,8 @@ class IndexListener implements EventSubscriber
                     $entry->setContent($content);
                 }
             }
+            
+            break; // prevent looping over inherited classes
         }
 
         $em->flush();
