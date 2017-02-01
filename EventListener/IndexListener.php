@@ -30,6 +30,7 @@ namespace whatwedo\SearchBundle\EventListener;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use whatwedo\SearchBundle\Entity\Index;
+use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
 class IndexListener implements EventSubscriber
@@ -131,7 +132,13 @@ class IndexListener implements EventSubscriber
             }
 
             $indexes = $this->indexManager->getIndexesOfEntity($class);
-            $idMethod = $this->indexManager->getIdMethod($class);
+
+            try {
+                $idMethod = @$this->indexManager->getIdMethod($class);
+            } catch (MethodNotFoundException $e) {
+                continue; // prevent indexing mapped superclasses without identifier
+            }
+
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
             foreach ($indexes as $field => $index) {
                 $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
@@ -148,8 +155,6 @@ class IndexListener implements EventSubscriber
                     $entry->setContent($content);
                 }
             }
-            
-            break; // prevent looping over inherited classes
         }
 
         $em->flush();
