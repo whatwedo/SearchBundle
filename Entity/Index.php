@@ -40,7 +40,17 @@ use Doctrine\ORM\Mapping as ORM;
  *          @ORM\Index(columns={"content"}, flags={"fulltext"}),
  *          @ORM\Index(columns={"model"})
  *     },
- *     options={"engine"="MyISAM"}
+ *     options={"engine"="MyISAM"},
+ *     uniqueConstraints={
+ *          @ORM\UniqueConstraint(
+ *              name="search_index",
+ *              columns={
+ *                  "foreign_id",
+ *                  "model",
+ *                  "field"
+ *              }
+ *          )
+ *     }
  * )
  */
 class Index
@@ -65,14 +75,14 @@ class Index
     /**
      * @var string
      *
-     * @ORM\Column(name="model", type="string", length=255, nullable=false)
+     * @ORM\Column(name="model", type="string", length=180, nullable=false)
      */
     protected $model;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="field", type="string", length=255, nullable=false)
+     * @ORM\Column(name="field", type="string", length=140, nullable=false)
      */
     protected $field;
 
