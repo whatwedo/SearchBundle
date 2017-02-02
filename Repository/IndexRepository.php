@@ -48,9 +48,11 @@ class IndexRepository extends EntityRepository
         // Build query
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
+            ->addSelect('MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote')
             ->where("MATCH_AGAINST(i.content, :query) > 0")
             ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
+            ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%');
         if ($entity != null) {
