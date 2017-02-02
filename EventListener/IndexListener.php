@@ -96,7 +96,8 @@ class IndexListener implements EventSubscriber
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$em->getMetadataFactory()->hasMetadataFor($class)) {
+            if (!$em->getMetadataFactory()->hasMetadataFor($class)
+                || !$this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
             $indexes = $this->indexManager->getIndexesOfEntity($class);
@@ -127,17 +128,13 @@ class IndexListener implements EventSubscriber
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$em->getMetadataFactory()->hasMetadataFor($class)) {
+            if (!$em->getMetadataFactory()->hasMetadataFor($class)
+                || !$this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
 
             $indexes = $this->indexManager->getIndexesOfEntity($class);
-
-            try {
-                $idMethod = @$this->indexManager->getIdMethod($class);
-            } catch (MethodNotFoundException $e) {
-                continue; // prevent indexing mapped superclasses without identifier
-            }
+            $idMethod = $this->indexManager->getIdMethod($class);
 
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
             foreach ($indexes as $field => $index) {
