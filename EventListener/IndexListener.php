@@ -104,7 +104,9 @@ class IndexListener implements EventSubscriber
             $idMethod = $this->indexManager->getIdMethod($entityName);
             foreach ($indexes as $field => $index) {
                 $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
-                $em->remove($entry);
+                if ($entry != null) {
+                    $em->remove($entry);
+                }
             }
         }
 
@@ -153,7 +155,7 @@ class IndexListener implements EventSubscriber
                 }
             }
         }
-        
+
         // prevents https://github.com/doctrine/doctrine2/issues/4004
         $em->getEventManager()->removeEventSubscriber($this);
         $em->flush();
