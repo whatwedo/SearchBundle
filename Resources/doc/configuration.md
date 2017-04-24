@@ -74,7 +74,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 ## Configuration file
 
-It's also possible to configure the indexed fields i your `config.yml`.
+It's also possible to configure the indexed fields in your `config.yml`.
 
 ```
 whatwedo_search:
