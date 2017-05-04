@@ -69,10 +69,14 @@ class IndexManager
         $connection = $this->em->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
         $tableName = $this->em->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
-        $connection->query('SET FOREIGN_KEY_CHECKS=0');
+        if ($connection->getDatabasePlatform()->getName() == 'mysql') {
+            $connection->query('SET FOREIGN_KEY_CHECKS=0');
+        }
         $query = $dbPlatform->getTruncateTableSql($tableName);
         $connection->executeUpdate($query);
-        $connection->query('SET FOREIGN_KEY_CHECKS=1');
+        if ($connection->getDatabasePlatform()->getName() == 'mysql') {
+            $connection->query('SET FOREIGN_KEY_CHECKS=1');
+        }
     }
 
     /**
