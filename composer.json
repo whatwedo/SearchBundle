@@ -22,7 +22,7 @@
     "require": {
         "php":                      ">=5.6",
         "symfony/symfony":          "~3.0",
-        "whatwedo/core-bundle":     "^0.1"
+        "whatwedo/core-bundle":     "^0.1|^0.2"
     },
     "autoload": {
         "psr-4": {
