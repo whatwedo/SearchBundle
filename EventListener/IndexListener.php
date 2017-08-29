@@ -150,16 +150,16 @@ class IndexListener implements EventSubscriber
                             ->setForeignId($entity->$idMethod())
                             ->setField($field);
                         $em->persist($entry);
+
+                        // prevents https://github.com/doctrine/doctrine2/issues/4004
+                        $em->getEventManager()->removeEventSubscriber($this);
+                        $em->flush($entry);
+                        $em->getEventManager()->addEventSubscriber($this);
                     }
                     $entry->setContent($content);
                 }
             }
         }
-
-        // prevents https://github.com/doctrine/doctrine2/issues/4004
-        $em->getEventManager()->removeEventSubscriber($this);
-        $em->flush();
-        $em->getEventManager()->addEventSubscriber($this);
     }
 
     /**
