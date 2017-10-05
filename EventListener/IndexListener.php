@@ -137,15 +137,13 @@ class IndexListener implements EventSubscriber
             $rmIndexInsertSQL->setAccessible(true);
             $this->indexInsertStmt = $em->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
             $this->indexUpdateStmt = $em->getConnection()->prepare(
-                'UPDATE '.
-                $indexPersister->getOwningTable('').
-                ' SET '.
-                $indexPersister->getClassMetadata()->getFieldMapping('content')['columnName'].
-                ' = ? WHERE '.
-                $indexPersister->getClassMetadata()->getFieldMapping('id')['columnName'].
-                ' = ?'
+                $em->createQueryBuilder()
+                    ->update(Index::class, 'i')
+                    ->set('i.content', '?1')
+                    ->where('i.id = ?2')
+                    ->getQuery()
+                    ->getSql()
             );
-
         }
         $entity = $args->getObject();
         if ($entity instanceof Index) {
