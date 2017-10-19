@@ -29,6 +29,8 @@ namespace whatwedo\SearchBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\DBAL\Statement;
+use Doctrine\ORM\Persisters\Entity\EntityPersister;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 use whatwedo\SearchBundle\Manager\IndexManager;
@@ -40,6 +42,16 @@ class IndexListener implements EventSubscriber
      * @var IndexManager
      */
     protected $indexManager;
+
+    /**
+     * @var Statement $indexInsertStmt
+     */
+    protected $indexInsertStmt;
+
+    /**
+     * @var Statement $indexUpdateStmt
+     */
+    protected $indexUpdateStmt;
 
     /**
      * IndexListener constructor.
@@ -119,6 +131,20 @@ class IndexListener implements EventSubscriber
     public function index(LifecycleEventArgs $args)
     {
         $em = $args->getObjectManager();
+        if (is_null($this->indexInsertStmt)) {
+            $indexPersister = $em->getUnitOfWork()->getEntityPersister(Index::class);
+            $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
+            $rmIndexInsertSQL->setAccessible(true);
+            $this->indexInsertStmt = $em->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
+            $this->indexUpdateStmt = $em->getConnection()->prepare(
+                $em->createQueryBuilder()
+                    ->update(Index::class, 'i')
+                    ->set('i.content', '?1')
+                    ->where('i.id = ?2')
+                    ->getQuery()
+                    ->getSql()
+            );
+        }
         $entity = $args->getObject();
         if ($entity instanceof Index) {
             return;
@@ -145,18 +171,16 @@ class IndexListener implements EventSubscriber
                 if (!empty($content)) {
                     $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
                     if (!$entry) {
-                        $entry = new Index();
-                        $entry->setModel($class)
-                            ->setForeignId($entity->$idMethod())
-                            ->setField($field);
-                        $em->persist($entry);
+                        $this->indexInsertStmt->bindValue(1, $entity->$idMethod());
+                        $this->indexInsertStmt->bindValue(2, $class);
+                        $this->indexInsertStmt->bindValue(3, $field);
+                        $this->indexInsertStmt->bindValue(4, $content);
+                        $this->indexInsertStmt->execute();
+                    } else {
+                        $this->indexUpdateStmt->bindValue(1, $content);
+                        $this->indexUpdateStmt->bindValue(2, $entry->getId());
+                        $this->indexUpdateStmt->execute();
                     }
-                    $entry->setContent($content);
-
-                    // prevents https://github.com/doctrine/doctrine2/issues/4004
-                    $em->getEventManager()->removeEventSubscriber($this);
-                    $em->flush($entry);
-                    $em->getEventManager()->addEventSubscriber($this);
                 }
             }
         }

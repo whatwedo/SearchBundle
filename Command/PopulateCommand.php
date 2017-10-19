@@ -138,8 +138,10 @@ class PopulateCommand extends BaseCommand
                 }
 
                 // Update progress bar every 200 iterations
+                // as well as gc
                 if ($i % 200 == 0) {
                     $progress->setProgress($i);
+                    $this->gc();
                 }
                 $i ++;
             }
