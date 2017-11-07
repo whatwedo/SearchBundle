@@ -5,6 +5,8 @@ services:
 
     whatwedo_search.event_listener.index:
         class: whatwedo\SearchBundle\EventListener\IndexListener
-        arguments: ["@whatwedo_search.manager.index"]
+        arguments:
+          - "@whatwedo_search.manager.index"
+          - "@whatwedo_core.manager.formatter"
         tags:
             - { name: doctrine.event_subscriber, connection: default }

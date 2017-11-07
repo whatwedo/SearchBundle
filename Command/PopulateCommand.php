@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016, whatwedo GmbH
+ * Copyright (c) 2017, whatwedo GmbH
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,13 +27,13 @@
 
 namespace whatwedo\SearchBundle\Command;
 
+use DataDog\AuditBundle\EventSubscriber\AuditSubscriber;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
-use whatwedo\School\CoreBundle\Entity\Identity;
-use whatwedo\School\PersonBundle\Entity\Person;
+use whatwedo\CoreBundle\Formatter\FormatterInterface;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
@@ -75,6 +75,20 @@ class PopulateCommand extends BaseCommand
 
         // Disable SQL logging
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+
+        // Disable Audit
+        $auditListener = null;
+        foreach ($this->em->getEventManager()->getListeners() as $event => $listeners) {
+            foreach ($listeners as $key => $listener) {
+                if ($listener instanceof AuditSubscriber) {
+                    $auditListener = $listener;
+                    break 2;
+                }
+            }
+        }
+        if ($auditListener) {
+            $this->em->getEventManager()->removeEventListener(['onFlush'], $auditListener);
+        }
 
         // Start transaction
         $this->debug('Starting SQL transaction');
@@ -124,7 +138,9 @@ class PopulateCommand extends BaseCommand
             foreach ($entities as $entity) {
 
                 // Get content
-                $content = call_user_func($index->getFormatter() . '::getString', $entity->$fieldMethod());
+                /** @var FormatterInterface $formatter */
+                $formatter = $this->get('whatwedo_core.manager.formatter')->getFormatter($index->getFormatter());
+                $content = $formatter->getString($entity->$fieldMethod());
 
                 // Persist entry
                 if (!empty($content)) {
