@@ -27,7 +27,6 @@
 
 namespace whatwedo\SearchBundle\Command;
 
-use DataDog\AuditBundle\EventSubscriber\AuditSubscriber;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -65,6 +64,10 @@ class PopulateCommand extends BaseCommand
             ->setHelp('This command populate the search index according to the entity annotations');
     }
 
+    protected function prePopulate()
+    {
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Initialize command
@@ -76,19 +79,8 @@ class PopulateCommand extends BaseCommand
         // Disable SQL logging
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
 
-        // Disable Audit
-        $auditListener = null;
-        foreach ($this->em->getEventManager()->getListeners() as $event => $listeners) {
-            foreach ($listeners as $key => $listener) {
-                if ($listener instanceof AuditSubscriber) {
-                    $auditListener = $listener;
-                    break 2;
-                }
-            }
-        }
-        if ($auditListener) {
-            $this->em->getEventManager()->removeEventListener(['onFlush'], $auditListener);
-        }
+        // for example disable unwanted EventListeners
+        $this->prePopulate();
 
         // Start transaction
         $this->debug('Starting SQL transaction');
