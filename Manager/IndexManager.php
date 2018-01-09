@@ -53,12 +53,13 @@ class IndexManager
     protected $config = [];
 
     /**
-     * IndexManager constructor.
      * @param EntityManager $em
+     * @return $this
      */
-    public function __construct(EntityManager $em)
+    public function setEntityManager($em)
     {
         $this->em = $em;
+        return $this;
     }
 
     /**
