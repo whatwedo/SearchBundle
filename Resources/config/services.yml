@@ -1,7 +1,10 @@
 services:
     whatwedo_search.manager.index:
         class: whatwedo\SearchBundle\Manager\IndexManager
-        arguments: ["@doctrine.orm.entity_manager"]
+        calls:
+            - method: setEntityManager
+              arguments:
+                  - "@doctrine.orm.entity_manager"
 
     whatwedo_search.event_listener.index:
         class: whatwedo\SearchBundle\EventListener\IndexListener
