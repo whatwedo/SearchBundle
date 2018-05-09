@@ -75,14 +75,14 @@ class Index
     /**
      * @var string
      *
-     * @ORM\Column(name="model", type="string", length=180, nullable=false)
+     * @ORM\Column(name="model", type="string", length=150, nullable=false)
      */
     protected $model;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="field", type="string", length=140, nullable=false)
+     * @ORM\Column(name="field", type="string", length=90, nullable=false)
      */
     protected $field;
 

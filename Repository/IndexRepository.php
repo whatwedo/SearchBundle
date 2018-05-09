@@ -27,7 +27,7 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
-use whatwedo\CoreBundle\Repository\EntityRepository;
+use Doctrine\ORM\EntityRepository;
 use whatwedo\SearchBundle\Entity\Index;
 
 /**
@@ -48,7 +48,7 @@ class IndexRepository extends EntityRepository
         // Build query
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
-            ->addSelect('MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote')
+            ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
             ->where("MATCH_AGAINST(i.content, :query) > 0")
             ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
