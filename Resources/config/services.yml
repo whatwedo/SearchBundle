@@ -1,22 +1,12 @@
 services:
-    whatwedo_search.manager.index:
-        class: whatwedo\SearchBundle\Manager\IndexManager
-        arguments:
-            - '@doctrine'
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
 
-    whatwedo_search.event_listener.index:
-        class: whatwedo\SearchBundle\EventListener\IndexListener
-        arguments:
-            - '@whatwedo_search.manager.index'
-            - '@whatwedo_core.manager.formatter'
+    whatwedo\SearchBundle\:
+        resource: '../../*'
+
+    whatwedo\SearchBundle\EventListener\IndexListener:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
-
-    whatwedo_search.command.populate:
-        class: whatwedo\SearchBundle\Command\PopulateCommand
-        arguments:
-            - '@doctrine'
-            - '@whatwedo_search.manager.index'
-            - '@whatwedo_core.manager.formatter'
-        tags:
-            - { name: 'console.command', command: 'whatwedo:search:populate'}

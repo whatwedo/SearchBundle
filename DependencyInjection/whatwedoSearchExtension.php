@@ -25,7 +25,7 @@ class whatwedoSearchExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-        $indexManager = $container->getDefinition('whatwedo_search.manager.index');
+        $indexManager = $container->getDefinition('whatwedo\SearchBundle\Manager\IndexManager');
         $indexManager->addMethodCall('setConfig', array($config));
     }
 }

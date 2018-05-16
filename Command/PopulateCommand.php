@@ -73,6 +73,8 @@ class PopulateCommand extends BaseCommand
      */
     public function __construct(RegistryInterface $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
+        parent::__construct(null);
+
         $this->doctrine = $doctrine;
         $this->indexManager = $indexManager;
         $this->formatterManager = $formatterManager;
