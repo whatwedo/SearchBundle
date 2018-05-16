@@ -28,11 +28,13 @@
 namespace whatwedo\SearchBundle\Command;
 
 use Doctrine\ORM\EntityManager;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
 use whatwedo\CoreBundle\Formatter\FormatterInterface;
+use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
@@ -49,9 +51,32 @@ class PopulateCommand extends BaseCommand
     protected $em;
 
     /**
+     * @var RegistryInterface
+     */
+    protected $doctrine;
+
+    /**
      * @var IndexManager
      */
     protected $indexManager;
+
+    /**
+     * @var FormatterManager
+     */
+    protected $formatterManager;
+
+    /**
+     * PopulateCommand constructor.
+     * @param RegistryInterface $doctrine
+     * @param IndexManager $indexManager
+     * @param FormatterManager $formatterManager
+     */
+    public function __construct(RegistryInterface $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
+    {
+        $this->doctrine = $doctrine;
+        $this->indexManager = $indexManager;
+        $this->formatterManager = $formatterManager;
+    }
 
     /**
      * Configure command
@@ -72,8 +97,7 @@ class PopulateCommand extends BaseCommand
     {
         // Initialize command
         parent::execute($input, $output);
-        $this->em = $this->getDoctrine()->getManager();
-        $this->indexManager = $this->get('whatwedo_search.manager.index');
+        $this->em = $this->doctrine->getManager();
         $entities = $this->indexManager->getIndexedEntities();
 
         // Disable SQL logging
@@ -107,6 +131,9 @@ class PopulateCommand extends BaseCommand
      * Populate index of given entity
      *
      * @param $entityName
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException
      */
     protected function indexEntity($entityName)
     {
@@ -130,8 +157,7 @@ class PopulateCommand extends BaseCommand
             foreach ($entities as $entity) {
 
                 // Get content
-                /** @var FormatterInterface $formatter */
-                $formatter = $this->get('whatwedo_core.manager.formatter')->getFormatter($index->getFormatter());
+                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
                 $content = $formatter->getString($entity->$fieldMethod());
 
                 // Persist entry

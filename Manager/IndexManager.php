@@ -45,7 +45,7 @@ class IndexManager
 {
 
     /**
-     * @var EntityManager
+     * @var RegistryInterface
      */
     protected $doctrine;
 
@@ -56,7 +56,7 @@ class IndexManager
 
     /**
      * IndexManager constructor.
-     * @param EntityManager $em
+     * @param RegistryInterface $doctrine
      */
     public function __construct(RegistryInterface $doctrine)
     {
@@ -68,9 +68,9 @@ class IndexManager
      */
     public function flush()
     {
-        $connection = $this->doctrine->getEntityManager()->getConnection();
+        $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
-        $tableName = $this->doctrine->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
+        $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
         if ($connection->getDatabasePlatform()->getName() == 'mysql') {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
         }
@@ -141,7 +141,7 @@ class IndexManager
     public function getIndexedEntities()
     {
         $tables = [];
-        $metaTables = $this->doctrine->getEntityManager()->getMetadataFactory()->getAllMetadata();
+        $metaTables = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
         /** @var ClassMetadata $metaTable */
         foreach ($metaTables as $metaTable) {
             $entity = $metaTable->getName();
@@ -160,7 +160,7 @@ class IndexManager
      */
     public function getIdMethod($entityName)
     {
-        $field = $this->doctrine->getEntityManager()->getClassMetadata($entityName)->getSingleIdentifierFieldName();
+        $field = $this->getEntityManager()->getClassMetadata($entityName)->getSingleIdentifierFieldName();
         return $this->getFieldAccessorMethod($entityName, $field);
     }
 
@@ -207,5 +207,9 @@ class IndexManager
     {
         $this->config = $config;
         return $this;
+    }
+
+    private function getEntityManager(): EntityManager {
+        return $this->doctrine->getEntityManager();
     }
 }
