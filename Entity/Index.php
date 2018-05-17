@@ -33,7 +33,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class SearchIndex
  * @package whatwedo\SearchBundle\Entity
  *
- * @ORM\Entity(repositoryClass="\whatwedo\SearchBundle\Repository\IndexRepository")
+ * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Repository\IndexRepository")
  * @ORM\Table(
  *     name="whatwedo_search_index",
  *     indexes={
