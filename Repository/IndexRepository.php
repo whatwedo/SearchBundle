@@ -27,15 +27,23 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 use whatwedo\SearchBundle\Entity\Index;
 
 /**
  * Class IndexRepository
  * @package whatwedo\SearchBundle\Repository
  */
-class IndexRepository extends EntityRepository
+class IndexRepository extends ServiceEntityRepository
 {
+    /**
+     * @param RegistryInterface $registry
+     */
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, Index::class);
+    }
 
     /**
      * @param $query
