@@ -30,6 +30,7 @@ namespace whatwedo\SearchBundle\Command;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
@@ -88,7 +89,8 @@ class PopulateCommand extends BaseCommand
         $this
             ->setName('whatwedo:search:populate')
             ->setDescription('Populate the search index')
-            ->setHelp('This command populate the search index according to the entity annotations');
+            ->setHelp('This command populate the search index according to the entity annotations')
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Only populate index for this entity');;
     }
 
     protected function prePopulate()
@@ -116,8 +118,11 @@ class PopulateCommand extends BaseCommand
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
+        $targetEntity = $input->getArgument('entity');
+
         // Indexing entities
         foreach ($entities as $entityName) {
+            if($targetEntity && $entityName != $targetEntity) continue;
             $this->indexEntity($entityName);
         }
 
