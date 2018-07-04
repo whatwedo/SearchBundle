@@ -53,16 +53,16 @@ class IndexRepository extends ServiceEntityRepository
      */
     public function search($query, $entity = null, $field = null)
     {
-        // Build query
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
             ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
-            ->where("MATCH_AGAINST(i.content, :query) > 0")
+            ->where("MATCH_AGAINST(i.content, :query) > :minScore")
             ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
-            ->setParameter('queryWildcard', '%'.$query.'%');
+            ->setParameter('queryWildcard', '%'.$query.'%')
+            ->setParameter('minScore', round(strlen($query) * 0.8));
         if ($entity != null) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
@@ -72,10 +72,8 @@ class IndexRepository extends ServiceEntityRepository
                 ->setParameter('fieldName', $field);
         };
 
-        // Get query result
         $result = $qb->getQuery()->getScalarResult();
 
-        // Get ID's
         $ids = [];
         foreach ($result as $row) {
             $ids[] = $row['foreignId'];
