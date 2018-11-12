@@ -42,6 +42,10 @@ class Index
      * @var string
      */
     public $formatter = 'whatwedo\CoreBundle\Formatter\DefaultFormatter';
+    /**
+     * @var array
+     */
+    public $formatterOptions = [];
 
     /**
      * @return string
@@ -59,5 +63,21 @@ class Index
     {
         $this->formatter = $formatter;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFormatterOptions(): array
+    {
+        return $this->formatterOptions;
+    }
+
+    /**
+     * @param array $formatterOptions
+     */
+    public function setFormatterOptions(array $formatterOptions): void
+    {
+        $this->formatterOptions = $formatterOptions;
     }
 }

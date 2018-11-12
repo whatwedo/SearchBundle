@@ -165,6 +165,7 @@ class PopulateCommand extends BaseCommand
 
                 // Get content
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
+                $formatter->processOptions($index->getFormatterOptions());
                 $content = $formatter->getString($entity->$fieldMethod());
 
                 // Persist entry

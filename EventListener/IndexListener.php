@@ -176,6 +176,7 @@ class IndexListener implements EventSubscriber
             foreach ($indexes as $field => $index) {
                 $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
+                $formatter->processOptions($index->getFormatterOptions());
                 $content = $formatter->getString($entity->$fieldMethod());
                 if (!empty($content)) {
                     $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
