@@ -209,7 +209,10 @@ class IndexManager
         return $this;
     }
 
-    private function getEntityManager(): EntityManager {
-        return $this->doctrine->getEntityManager();
+    /**
+     * @return EntityManager
+     */
+    protected function getEntityManager(): EntityManager {
+        return $this->doctrine->getManager();
     }
 }
