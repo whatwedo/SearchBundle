@@ -40,7 +40,6 @@ use Doctrine\ORM\Mapping as ORM;
  *          @ORM\Index(columns={"content"}, flags={"fulltext"}),
  *          @ORM\Index(columns={"model"})
  *     },
- *     options={"engine"="MyISAM"},
  *     uniqueConstraints={
  *          @ORM\UniqueConstraint(
  *              name="search_index",
