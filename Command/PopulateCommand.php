@@ -151,28 +151,29 @@ class PopulateCommand extends BaseCommand
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
         // Get entities
-        $entities = $this->em->getRepository($entityName)->findAll();
+        $entities = $this->em->createQuery('SELECT DISTINCT e FROM ' . $entityName . ' e')->iterate();
+        $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
-        $progress = new ProgressBar($this->output, count($entities) * count($indexes));
+        $progress = new ProgressBar($this->output, $entityCount * count($indexes));
         $progress->start();
 
         $i = 0;
-        /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-        foreach ($indexes as $field => $index) {
-            $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
-            foreach ($entities as $entity) {
+        foreach ($entities as $entity) {
+            /** @var \whatwedo\SearchBundle\Annotation\Index $index */
+            foreach ($indexes as $field => $index) {
+                $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
 
                 // Get content
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
                 $formatter->processOptions($index->getFormatterOptions());
-                $content = $formatter->getString($entity->$fieldMethod());
+                $content = $formatter->getString($entity[0]->$fieldMethod());
 
                 // Persist entry
                 if (!empty($content)) {
                     $entry = new Index();
                     $entry->setModel($entityName)
-                        ->setForeignId($entity->$idMethod())
+                        ->setForeignId($entity[0]->$idMethod())
                         ->setField($field)
                         ->setContent($content);
                     $this->em->persist($entry);
@@ -187,6 +188,7 @@ class PopulateCommand extends BaseCommand
                 }
                 $i ++;
             }
+            $this->em->detach($entity[0]);
         }
         $this->gc();
 
