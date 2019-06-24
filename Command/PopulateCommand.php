@@ -151,7 +151,7 @@ class PopulateCommand extends BaseCommand
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
         // Get entities
-        $entities = $this->em->createQuery('SELECT DISTINCT e FROM ' . $entityName . ' e')->iterate();
+        $entities = $this->em->getRepository($entityName)->createQueryBuilder('e')->getQuery()->iterate();
         $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
