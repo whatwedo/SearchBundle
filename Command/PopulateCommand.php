@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016, whatwedo GmbH
+ * Copyright (c) 2017, whatwedo GmbH
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,14 @@
 namespace whatwedo\SearchBundle\Command;
 
 use Doctrine\ORM\EntityManager;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
-use whatwedo\School\CoreBundle\Entity\Identity;
-use whatwedo\School\PersonBundle\Entity\Person;
+use whatwedo\CoreBundle\Formatter\FormatterInterface;
+use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
@@ -50,9 +52,34 @@ class PopulateCommand extends BaseCommand
     protected $em;
 
     /**
+     * @var RegistryInterface
+     */
+    protected $doctrine;
+
+    /**
      * @var IndexManager
      */
     protected $indexManager;
+
+    /**
+     * @var FormatterManager
+     */
+    protected $formatterManager;
+
+    /**
+     * PopulateCommand constructor.
+     * @param RegistryInterface $doctrine
+     * @param IndexManager $indexManager
+     * @param FormatterManager $formatterManager
+     */
+    public function __construct(RegistryInterface $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
+    {
+        parent::__construct(null);
+
+        $this->doctrine = $doctrine;
+        $this->indexManager = $indexManager;
+        $this->formatterManager = $formatterManager;
+    }
 
     /**
      * Configure command
@@ -62,19 +89,26 @@ class PopulateCommand extends BaseCommand
         $this
             ->setName('whatwedo:search:populate')
             ->setDescription('Populate the search index')
-            ->setHelp('This command populate the search index according to the entity annotations');
+            ->setHelp('This command populate the search index according to the entity annotations')
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Only populate index for this entity');;
+    }
+
+    protected function prePopulate()
+    {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Initialize command
         parent::execute($input, $output);
-        $this->em = $this->getDoctrine()->getManager();
-        $this->indexManager = $this->get('whatwedo_search.manager.index');
+        $this->em = $this->doctrine->getManager();
         $entities = $this->indexManager->getIndexedEntities();
 
         // Disable SQL logging
         $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+
+        // for example disable unwanted EventListeners
+        $this->prePopulate();
 
         // Start transaction
         $this->debug('Starting SQL transaction');
@@ -84,8 +118,11 @@ class PopulateCommand extends BaseCommand
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
+        $targetEntity = $input->getArgument('entity');
+
         // Indexing entities
         foreach ($entities as $entityName) {
+            if($targetEntity && $entityName != $targetEntity) continue;
             $this->indexEntity($entityName);
         }
 
@@ -101,6 +138,9 @@ class PopulateCommand extends BaseCommand
      * Populate index of given entity
      *
      * @param $entityName
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException
      */
     protected function indexEntity($entityName)
     {
@@ -111,26 +151,29 @@ class PopulateCommand extends BaseCommand
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
         // Get entities
-        $entities = $this->em->getRepository($entityName)->findAll();
+        $entities = $this->em->getRepository($entityName)->createQueryBuilder('e')->getQuery()->iterate();
+        $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
-        $progress = new ProgressBar($this->output, count($entities) * count($indexes));
+        $progress = new ProgressBar($this->output, $entityCount * count($indexes));
         $progress->start();
 
         $i = 0;
-        /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-        foreach ($indexes as $field => $index) {
-            $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
-            foreach ($entities as $entity) {
+        foreach ($entities as $entity) {
+            /** @var \whatwedo\SearchBundle\Annotation\Index $index */
+            foreach ($indexes as $field => $index) {
+                $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
 
                 // Get content
-                $content = call_user_func($index->getFormatter() . '::getString', $entity->$fieldMethod());
+                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
+                $formatter->processOptions($index->getFormatterOptions());
+                $content = $formatter->getString($entity[0]->$fieldMethod());
 
                 // Persist entry
                 if (!empty($content)) {
                     $entry = new Index();
                     $entry->setModel($entityName)
-                        ->setForeignId($entity->$idMethod())
+                        ->setForeignId($entity[0]->$idMethod())
                         ->setField($field)
                         ->setContent($content);
                     $this->em->persist($entry);
@@ -145,6 +188,7 @@ class PopulateCommand extends BaseCommand
                 }
                 $i ++;
             }
+            $this->em->detach($entity[0]);
         }
         $this->gc();
 

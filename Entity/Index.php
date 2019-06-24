@@ -33,14 +33,13 @@ use Doctrine\ORM\Mapping as ORM;
  * Class SearchIndex
  * @package whatwedo\SearchBundle\Entity
  *
- * @ORM\Entity(repositoryClass="\whatwedo\SearchBundle\Repository\IndexRepository")
+ * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Repository\IndexRepository")
  * @ORM\Table(
  *     name="whatwedo_search_index",
  *     indexes={
  *          @ORM\Index(columns={"content"}, flags={"fulltext"}),
  *          @ORM\Index(columns={"model"})
  *     },
- *     options={"engine"="MyISAM"},
  *     uniqueConstraints={
  *          @ORM\UniqueConstraint(
  *              name="search_index",
@@ -75,14 +74,14 @@ class Index
     /**
      * @var string
      *
-     * @ORM\Column(name="model", type="string", length=180, nullable=false)
+     * @ORM\Column(name="model", type="string", length=150, nullable=false)
      */
     protected $model;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="field", type="string", length=140, nullable=false)
+     * @ORM\Column(name="field", type="string", length=90, nullable=false)
      */
     protected $field;
 

@@ -27,15 +27,23 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
-use whatwedo\CoreBundle\Repository\EntityRepository;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 use whatwedo\SearchBundle\Entity\Index;
 
 /**
  * Class IndexRepository
  * @package whatwedo\SearchBundle\Repository
  */
-class IndexRepository extends EntityRepository
+class IndexRepository extends ServiceEntityRepository
 {
+    /**
+     * @param RegistryInterface $registry
+     */
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, Index::class);
+    }
 
     /**
      * @param $query
@@ -45,16 +53,16 @@ class IndexRepository extends EntityRepository
      */
     public function search($query, $entity = null, $field = null)
     {
-        // Build query
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
-            ->addSelect('MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote')
-            ->where("MATCH_AGAINST(i.content, :query) > 0")
+            ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
+            ->where("MATCH_AGAINST(i.content, :query) > :minScore")
             ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
-            ->setParameter('queryWildcard', '%'.$query.'%');
+            ->setParameter('queryWildcard', '%'.$query.'%')
+            ->setParameter('minScore', round(strlen($query) * 0.8));
         if ($entity != null) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
@@ -64,10 +72,8 @@ class IndexRepository extends EntityRepository
                 ->setParameter('fieldName', $field);
         };
 
-        // Get query result
         $result = $qb->getQuery()->getScalarResult();
 
-        // Get ID's
         $ids = [];
         foreach ($result as $row) {
             $ids[] = $row['foreignId'];

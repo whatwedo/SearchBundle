@@ -31,6 +31,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\Persisters\Entity\EntityPersister;
+use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 use whatwedo\SearchBundle\Manager\IndexManager;
@@ -54,12 +55,19 @@ class IndexListener implements EventSubscriber
     protected $indexUpdateStmt;
 
     /**
+     * @var FormatterManager $formatterManager
+     */
+    protected $formatterManager;
+
+    /**
      * IndexListener constructor.
      * @param IndexManager $indexManager
+     * @param FormatterManager $formatterManager
      */
-    public function __construct(IndexManager $indexManager)
+    public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
     {
         $this->indexManager = $indexManager;
+        $this->formatterManager = $formatterManager;
     }
 
     /**
@@ -167,7 +175,9 @@ class IndexListener implements EventSubscriber
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
             foreach ($indexes as $field => $index) {
                 $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
-                $content = call_user_func($index->getFormatter() . '::getString', $entity->$fieldMethod());
+                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
+                $formatter->processOptions($index->getFormatterOptions());
+                $content = $formatter->getString($entity->$fieldMethod());
                 if (!empty($content)) {
                     $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
                     if (!$entry) {
