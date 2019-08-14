@@ -105,6 +105,7 @@ class IndexManager
             }
         }
 
+        // Check if entitiess exists
         if ( isset($this->config['entities']) ) {
             foreach ($this->config['entities'] as $entityConfig) {
                 if ($entityConfig['class'] == $entity) {
