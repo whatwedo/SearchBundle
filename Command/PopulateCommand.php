@@ -150,8 +150,12 @@ class PopulateCommand extends BaseCommand
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
+        // get clean QueryBuilder
+        $queryBuilder = $this->em->createQueryBuilder();
+        $queryBuilder->from($entityName, 'e')->select('e');
+
         // Get entities
-        $entities = $this->em->getRepository($entityName)->createQueryBuilder('e')->getQuery()->iterate();
+        $entities = $queryBuilder->getQuery()->iterate();
         $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
