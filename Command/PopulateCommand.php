@@ -115,39 +115,42 @@ class PopulateCommand extends BaseCommand
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
-        $targetEntity = $input->getArgument('entity');
+        $targetEntity = $this->escape($input->getArgument('entity'));
 
-        if (strpos($targetEntity, '\\\\') == false) {
-            $targetEntity = str_replace('\\', '\\\\', $targetEntity);
-        }
-
-        $entityExists = $this->doctrine->getEntityManager()->getMetadataFactory()->isTransient($targetEntity);
+        $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
         if (!$entityExists) {
             $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
             exit(1);
         }
 
-        if (!in_array($targetEntity, $entities)) {
+        if ($targetEntity && !in_array(str_replace('\\\\', '\\', $targetEntity), $entities)) {
             $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
             exit(1);
         }
 
         // Start transaction
         $this->debug('Starting SQL transaction');
-        $this->em->beginTransaction();
+//        $this->em->beginTransaction();
 
         // Indexing entities
+        $runned = false;
         foreach ($entities as $entityName) {
-            if ($targetEntity && $entityName != $targetEntity)
+            if ($targetEntity && $entityName != str_replace('\\\\', '\\', $targetEntity))
             {
                 continue;
             }
             $this->indexEntity($entityName);
+            $runned = true;
         }
+
+        if (!$runned) {
+            $this->log('Indexer not runned!');
+        }
+
 
         // Commit transaction
         $this->debug('Committing SQL transaction');
-        $this->em->commit();
+//        $this->em->commit();
 
         // Tear down
         $this->tearDown();
@@ -228,4 +231,16 @@ class PopulateCommand extends BaseCommand
         $this->em->clear();
         gc_collect_cycles();
     }
+
+    protected function escape(?string $value) : ?string
+    {
+        if (strpos($value, '\\\\') == false) {
+            $value = str_replace('\\', '\\\\', $value);
+        }
+
+        return $value;
+
+    }
+
+
 }
