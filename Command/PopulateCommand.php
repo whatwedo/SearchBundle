@@ -122,17 +122,14 @@ class PopulateCommand extends BaseCommand
         }
 
         $entityExists = $this->doctrine->getEntityManager()->getMetadataFactory()->isTransient($targetEntity);
-        if ($entityExists) {
+        if (!$entityExists) {
             $this->log('Entity "' . $targetEntity . '" not found');
             exit(1);
         }
 
-
         // Start transaction
         $this->debug('Starting SQL transaction');
         $this->em->beginTransaction();
-
-
 
         // Indexing entities
         foreach ($entities as $entityName) {
