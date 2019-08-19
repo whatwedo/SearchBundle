@@ -110,15 +110,29 @@ class PopulateCommand extends BaseCommand
         // for example disable unwanted EventListeners
         $this->prePopulate();
 
-        // Start transaction
-        $this->debug('Starting SQL transaction');
-        $this->em->beginTransaction();
 
         // Flush index
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
         $targetEntity = $input->getArgument('entity');
+
+        if (strpos($targetEntity, '\\\\') == false) {
+            $targetEntity = str_replace('\\', '\\\\', $targetEntity);
+        }
+
+        $entityExists = $this->doctrine->getEntityManager()->getMetadataFactory()->isTransient($targetEntity);
+        if ($entityExists) {
+            $this->log('Entity "' . $targetEntity . '" not found');
+            exit(1);
+        }
+
+
+        // Start transaction
+        $this->debug('Starting SQL transaction');
+        $this->em->beginTransaction();
+
+
 
         // Indexing entities
         foreach ($entities as $entityName) {

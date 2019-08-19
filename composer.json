@@ -4,7 +4,7 @@
     "description": "Full text search on Doctrine entities without external dependencies.",
     "license": "MIT",
     "homepage": "https://doc.whatwedo.ch/whatwedo/searchbundle",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Ueli Banholzer",
@@ -17,6 +17,10 @@
         {
             "name": "Nicolo Singer",
             "email": "nicolo@whatwedo.ch"
+        },
+        {
+            "name": "Maurizio Monticelli",
+            "email": "maurizio@whatwedo.ch"
         }
     ],
     "require": {
@@ -29,5 +33,8 @@
         "psr-4": {
             "whatwedo\\SearchBundle\\": ""
         }
+    },
+    "require-dev": {
+        "symfony/orm-pack": "^1.0"
     }
 }
