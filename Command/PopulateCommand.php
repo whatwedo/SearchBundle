@@ -123,7 +123,12 @@ class PopulateCommand extends BaseCommand
 
         $entityExists = $this->doctrine->getEntityManager()->getMetadataFactory()->isTransient($targetEntity);
         if (!$entityExists) {
-            $this->log('Entity "' . $targetEntity . '" not found');
+            $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
+            exit(1);
+        }
+
+        if (!in_array($targetEntity, $entities)) {
+            $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
             exit(1);
         }
 
@@ -133,7 +138,10 @@ class PopulateCommand extends BaseCommand
 
         // Indexing entities
         foreach ($entities as $entityName) {
-            if($targetEntity && $entityName != $targetEntity) continue;
+            if ($targetEntity && $entityName != $targetEntity)
+            {
+                continue;
+            }
             $this->indexEntity($entityName);
         }
 
