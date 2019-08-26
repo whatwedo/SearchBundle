@@ -110,7 +110,6 @@ class PopulateCommand extends BaseCommand
         // for example disable unwanted EventListeners
         $this->prePopulate();
 
-
         // Flush index
         $this->log('Flushing index table');
         $this->indexManager->flush();
@@ -128,15 +127,10 @@ class PopulateCommand extends BaseCommand
             exit(1);
         }
 
-        // Start transaction
-        $this->debug('Starting SQL transaction');
-//        $this->em->beginTransaction();
-
         // Indexing entities
         $runned = false;
         foreach ($entities as $entityName) {
-            if ($targetEntity && $entityName != str_replace('\\\\', '\\', $targetEntity))
-            {
+            if ($targetEntity && $entityName != str_replace('\\\\', '\\', $targetEntity)) {
                 continue;
             }
             $this->indexEntity($entityName);
@@ -146,11 +140,6 @@ class PopulateCommand extends BaseCommand
         if (!$runned) {
             $this->log('Indexer not runned!');
         }
-
-
-        // Commit transaction
-        $this->debug('Committing SQL transaction');
-//        $this->em->commit();
 
         // Tear down
         $this->tearDown();
@@ -184,6 +173,15 @@ class PopulateCommand extends BaseCommand
         $progress = new ProgressBar($this->output, $entityCount * count($indexes));
         $progress->start();
 
+        $indexQuery = $this->em->createQueryBuilder()
+            ->from(Index::class, 'e')
+            ->select('e')
+            ->where('e.model = :model')
+            ->andWhere('e.foreignId = :foreignId')
+            ->andWhere('e.field = :field')
+            ->setMaxResults(1)
+        ;
+
         $i = 0;
         foreach ($entities as $entity) {
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
@@ -197,12 +195,24 @@ class PopulateCommand extends BaseCommand
 
                 // Persist entry
                 if (!empty($content)) {
-                    $entry = new Index();
+                    $entry = $indexQuery->setParameters([
+                        'model' => $entityName,
+                        'foreignId' => $entity[0]->$idMethod(),
+                        'field' => $field,
+                    ])->getQuery()->getOneOrNullResult();
+
+                    if (!$entry) {
+                        $entry = new Index();
+                    }
+
                     $entry->setModel($entityName)
                         ->setForeignId($entity[0]->$idMethod())
                         ->setField($field)
                         ->setContent($content);
-                    $this->em->persist($entry);
+
+                    if (!$entry->getId()) {
+                        $this->em->persist($entry);
+                    }
                     $this->em->flush($entry);
                 }
 
