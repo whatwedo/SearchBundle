@@ -104,14 +104,18 @@ class IndexManager
                 $fields[$method->getName()] = $annotation;
             }
         }
-        foreach ($this->config['entities'] as $entityConfig) {
-            if ($entityConfig['class'] == $entity) {
-                foreach ($entityConfig['fields'] as $fieldConfig) {
-                    $annotation = new Index();
-                    if (isset($fieldConfig['formatter'])) {
-                        $annotation->setFormatter($fieldConfig['formatter']);
+
+        // Check if entitiess exists
+        if ( isset($this->config['entities']) ) {
+            foreach ($this->config['entities'] as $entityConfig) {
+                if ($entityConfig['class'] == $entity) {
+                    foreach ($entityConfig['fields'] as $fieldConfig) {
+                        $annotation = new Index();
+                        if (isset($fieldConfig['formatter'])) {
+                            $annotation->setFormatter($fieldConfig['formatter']);
+                        }
+                        $fields[$fieldConfig['name']] = $annotation;
                     }
-                    $fields[$fieldConfig['name']] = $annotation;
                 }
             }
         }

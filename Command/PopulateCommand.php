@@ -110,25 +110,36 @@ class PopulateCommand extends BaseCommand
         // for example disable unwanted EventListeners
         $this->prePopulate();
 
-        // Start transaction
-        $this->debug('Starting SQL transaction');
-        $this->em->beginTransaction();
-
         // Flush index
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
-        $targetEntity = $input->getArgument('entity');
+        $targetEntity = $this->escape($input->getArgument('entity'));
 
-        // Indexing entities
-        foreach ($entities as $entityName) {
-            if($targetEntity && $entityName != $targetEntity) continue;
-            $this->indexEntity($entityName);
+        $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
+        if (!$entityExists) {
+            $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
+            exit(1);
         }
 
-        // Commit transaction
-        $this->debug('Committing SQL transaction');
-        $this->em->commit();
+        if ($targetEntity && !in_array(str_replace('\\\\', '\\', $targetEntity), $entities)) {
+            $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
+            exit(1);
+        }
+
+        // Indexing entities
+        $runned = false;
+        foreach ($entities as $entityName) {
+            if ($targetEntity && $entityName != str_replace('\\\\', '\\', $targetEntity)) {
+                continue;
+            }
+            $this->indexEntity($entityName);
+            $runned = true;
+        }
+
+        if (!$runned) {
+            $this->log('Indexer not runned!');
+        }
 
         // Tear down
         $this->tearDown();
@@ -150,13 +161,26 @@ class PopulateCommand extends BaseCommand
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
+        // get clean QueryBuilder
+        $queryBuilder = $this->em->createQueryBuilder();
+        $queryBuilder->from($entityName, 'e')->select('e');
+
         // Get entities
-        $entities = $this->em->getRepository($entityName)->createQueryBuilder('e')->getQuery()->iterate();
+        $entities = $queryBuilder->getQuery()->iterate();
         $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
         $progress = new ProgressBar($this->output, $entityCount * count($indexes));
         $progress->start();
+
+        $indexQuery = $this->em->createQueryBuilder()
+            ->from(Index::class, 'e')
+            ->select('e')
+            ->where('e.model = :model')
+            ->andWhere('e.foreignId = :foreignId')
+            ->andWhere('e.field = :field')
+            ->setMaxResults(1)
+        ;
 
         $i = 0;
         foreach ($entities as $entity) {
@@ -171,12 +195,24 @@ class PopulateCommand extends BaseCommand
 
                 // Persist entry
                 if (!empty($content)) {
-                    $entry = new Index();
+                    $entry = $indexQuery->setParameters([
+                        'model' => $entityName,
+                        'foreignId' => $entity[0]->$idMethod(),
+                        'field' => $field,
+                    ])->getQuery()->getOneOrNullResult();
+
+                    if (!$entry) {
+                        $entry = new Index();
+                    }
+
                     $entry->setModel($entityName)
                         ->setForeignId($entity[0]->$idMethod())
                         ->setField($field)
                         ->setContent($content);
-                    $this->em->persist($entry);
+
+                    if (!$entry->getId()) {
+                        $this->em->persist($entry);
+                    }
                     $this->em->flush($entry);
                 }
 
@@ -205,4 +241,16 @@ class PopulateCommand extends BaseCommand
         $this->em->clear();
         gc_collect_cycles();
     }
+
+    protected function escape(?string $value) : ?string
+    {
+        if (strpos($value, '\\\\') == false) {
+            $value = str_replace('\\', '\\\\', $value);
+        }
+
+        return $value;
+
+    }
+
+
 }
