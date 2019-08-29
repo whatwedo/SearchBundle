@@ -27,9 +27,14 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
+use App\Person\Entity\PersonPreSearchable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use whatwedo\SearchBundle\Annotation\Searchable;
 use whatwedo\SearchBundle\Entity\Index;
+use whatwedo\SearchBundle\Entity\PostSearchInterface;
+use whatwedo\SearchBundle\Entity\PreSearchInterface;
 
 /**
  * Class IndexRepository
@@ -57,12 +62,12 @@ class IndexRepository extends ServiceEntityRepository
             ->select('i.foreignId')
             ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
             ->where("MATCH_AGAINST(i.content, :query) > :minScore")
-            ->orWhere('i.content LIKE :queryWildcard')
+            ->andWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%')
-            ->setParameter('minScore', round(strlen($query) * 0.8));
+            ->setParameter('minScore', round(strlen($query) * 1.5));
         if ($entity != null) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
@@ -72,12 +77,44 @@ class IndexRepository extends ServiceEntityRepository
                 ->setParameter('fieldName', $field);
         };
 
+        // preSearch
+        $reflection = new \ReflectionClass($entity);
+        $annotationReader = new AnnotationReader();
+
+        /** @var Searchable $searchableAnnotations */
+        $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
+
+        if ($searchableAnnotations) {
+            if ($class = $searchableAnnotations->getPreSearch()) {
+                if (class_exists($class)) {
+                    $reflection = new \ReflectionClass($class);
+                    if ($reflection->implementsInterface(PreSearchInterface::class)) {
+                        $qb = (new $class)->preSearch($qb, $query, $entity, $field);
+                    }
+                }
+            }
+        }
+
         $result = $qb->getQuery()->getScalarResult();
 
         $ids = [];
         foreach ($result as $row) {
             $ids[] = $row['foreignId'];
         }
+
+        // postSearch
+        if ($searchableAnnotations) {
+            if ($class = $searchableAnnotations->getPostSearch()) {
+                if (class_exists($class)) {
+                    $reflection = new \ReflectionClass($class);
+                    if ($reflection->implementsInterface(PostSearchInterface::class)) {
+                        $ids = (new $class)->postSearch($ids);
+                    }
+                }
+            }
+        }
+
+
         return $ids;
     }
 
