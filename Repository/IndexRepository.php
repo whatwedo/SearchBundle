@@ -27,7 +27,6 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
-use App\Person\Entity\PersonPreSearchable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -62,12 +61,12 @@ class IndexRepository extends ServiceEntityRepository
             ->select('i.foreignId')
             ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
             ->where("MATCH_AGAINST(i.content, :query) > :minScore")
-            ->andWhere('i.content LIKE :queryWildcard')
+            ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%')
-            ->setParameter('minScore', round(strlen($query) * 1.5));
+            ->setParameter('minScore', round(strlen($query) * 0.8));
         if ($entity != null) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);

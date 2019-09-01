@@ -37,7 +37,7 @@ class SearchableManager
      * @throws \Exception
      */
     public function getSearchable($name) {
-        $seachables = $this->discovery->getSeachables();
+        $seachables = $this->discovery->getSearchables();
         if (isset($seachables[$name])) {
             return $seachables[$name];
         }
@@ -49,12 +49,12 @@ class SearchableManager
      * Creates a worker
      *
      * @param $name
-     * @return WorkerInterface
+     * @return Se
      *
      * @throws \Exception
      */
     public function create($name) {
-        $workers = $this->discovery->getSeachables();
+        $workers = $this->discovery->getSearchables();
         if (array_key_exists($name, $workers)) {
             $class = $workers[$name]['class'];
             if (!class_exists($class)) {

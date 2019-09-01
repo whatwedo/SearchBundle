@@ -2,6 +2,8 @@
 namespace whatwedo\SearchBundle\Discovery;
 
 
+use whatwedo\SearchBundle\Annotation\Searchable;
+
 class SearchableDiscovery
 {
 
@@ -35,12 +37,12 @@ class SearchableDiscovery
     /**
      * @var array
      */
-    private $seachables = [];
+    private $searchables = [];
 
 
 
     /**
-     * WorkerDiscovery constructor.
+     * SearchableDiscovery constructor.
      *
      * @param $namespace
      *   The namespace of the workers
@@ -58,12 +60,12 @@ class SearchableDiscovery
     /**
      * Returns all the workers
      */
-    public function getSeachables() {
-        if (!$this->seachables) {
-            $this->discoverWorkers();
+    public function getSearchables() {
+        if (!$this->searchables) {
+            $this->discoverSearchables();
         }
 
-        return $this->seachables;
+        return $this->searchables;
     }
 
     /**
@@ -77,7 +79,7 @@ class SearchableDiscovery
         /** @var SplFileInfo $file */
         foreach ($finder as $file) {
             $class ='\\' . $file->getBasename('.php');
-            $annotation = $this->annotationReader->getClassAnnotation(new \ReflectionClass($class), 'whatwedo\SearchBundle\Annotation\Searchable');
+            $annotation = $this->annotationReader->getClassAnnotation(new \ReflectionClass($class), Searchable::class);
             if (!$annotation) {
                 continue;
             }
