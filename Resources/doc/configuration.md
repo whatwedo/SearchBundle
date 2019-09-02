@@ -7,7 +7,7 @@ There are two ways to configure the indexed entities. Either by using annotation
 In your entities, you have to configure the indexed fields with the index annotation:
 
 ```
-// src/Agency/UserBundle/Entity/User.php
+// src/Entity/User.php
 
 // ...
 
@@ -29,7 +29,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 It is possible to define a custom formatter:
 
 ```
-// src/Agency/UserBundle/Entity/User.php
+// src/Entity/User.php
 
 // ...
 
@@ -51,7 +51,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 You can index a method return value too:
 
 ```
-// src/Agency/UserBundle/Entity/User.php
+// src/Entity/User.php
 
 // ...
 
@@ -75,7 +75,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 Annotations for modifing the search results, with preSearch and postSearch hooks
 
 ```
-// src/Agency/UserBundle/Entity/User.php
+// src/Entity/User.php
 
 // ...
 
@@ -102,7 +102,7 @@ class User
 
 The preSearch Hook 
 ```
-// src/Agency/UserBundle/Search/UserPreSearch.php
+// src/Search/UserPreSearch.php
 
 // ...
 
@@ -123,7 +123,7 @@ class UserPreSearch implements PreSearchInterface
 
 The postSearch Hook 
 ```
-// src/Agency/UserBundle/Search/UserPostSearch.php
+// src/Search/UserPostSearch.php
 
 use whatwedo\SearchBundle\Entity\PostSearchInterface;
 
