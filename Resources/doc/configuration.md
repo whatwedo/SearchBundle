@@ -72,9 +72,99 @@ use whatwedo\SearchBundle\Annotation\Index;
 // ...
 ```
 
+Annotations for modifing the search results, with preSearch and postSearch hooks
+
+```
+// src/Agency/UserBundle/Entity/User.php
+
+// ...
+
+use Doctrine\ORM\Mapping as ORM;
+use whatwedo\SearchBundle\Annotation\Index;
+use whatwedo\SearchBundle\Annotation\Searchable;
+
+// ...
+/**
+ * Personen.
+ *
+ * @ORM\Table(name="user")
+ * @Searchable(
+ *     preSearch="App\Agency\Search\UserPreSearch"
+ *     preSearch="App\Agency\Search\UserPostSearch"
+ * )
+ */
+class User
+{
+   // .....
+    
+
+```
+
+The preSearch Hook 
+```
+// src/Agency/UserBundle/Search/UserPreSearch.php
+
+// ...
+
+use Doctrine\ORM\QueryBuilder;
+use whatwedo\SearchBundle\Entity\PreSearchInterface;
+
+// ...
+class UserPreSearch implements PreSearchInterface
+{
+   // .....
+    public function preSearch(QueryBuilder &$qb, string $query, ? string $entity, ? string $field): void
+    {
+        // modify the QueryBuilder
+    }    
+
+```
+
+
+The postSearch Hook 
+```
+// src/Agency/UserBundle/Search/UserPostSearch.php
+
+use whatwedo\SearchBundle\Entity\PostSearchInterface;
+
+class PersonPostSearch implements PostSearchInterface
+{
+
+
+    public function postSearch(array $queryResults, string $query, ?string $entity, ?string $field): array
+    {
+
+        // modify queryResults
+        $modifiedResults = [];
+
+        foreach ($queryResults as $queryResult) {
+            // remove special Entity 1
+            if ($queryResult['foreignId'] == 1) {
+                continue;
+            }
+
+            // remvoe low matchQuotes
+            if ($queryResult['_matchQuote'] < 15) {
+                continue;
+            }
+
+            $modifiedResults[] = $queryResult;
+        }
+
+        return $modifiedResults;
+    }
+
+}
+
+```
+
+
+
+
 ## Configuration file
 
-It's also possible to configure the indexed fields in your `config.yml`.
+It's also possible to configure the indexed fields in your `config.yml` 
+or create `config/packages/whatwedo_search.yaml` for Symfony 4
 
 ```
 whatwedo_search:
@@ -85,3 +175,4 @@ whatwedo_search:
                 - { name: firstname }
                 - { name: createdAt, formatter: whatwedo\CoreBundle\Formatter\DateTimeFormatter }
 ```
+
