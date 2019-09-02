@@ -8,5 +8,5 @@ use Doctrine\ORM\QueryBuilder;
 
 interface PreSearchInterface
 {
-    public function preSearch(QueryBuilder $qb, string $query, ? string $entity, ? string $fields): QueryBuilder;
+    public function preSearch(QueryBuilder &$qb, string $query, ? string $entity, ? string $field): void;
 }

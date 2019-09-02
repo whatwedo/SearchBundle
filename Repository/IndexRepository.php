@@ -27,7 +27,6 @@
 
 namespace whatwedo\SearchBundle\Repository;
 
-use App\Person\Entity\PersonPreSearchable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -60,14 +59,15 @@ class IndexRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
-            ->addSelect("MATCH_AGAINST(i.content, :query) AS HIDDEN _matchQuote")
+            ->addSelect("MATCH_AGAINST(i.content, :query) AS _matchQuote")
             ->where("MATCH_AGAINST(i.content, :query) > :minScore")
-            ->andWhere('i.content LIKE :queryWildcard')
+            ->orWhere('i.content LIKE :queryWildcard')
             ->groupBy('i.foreignId')
+            ->addGroupBy('_matchQuote')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%')
-            ->setParameter('minScore', round(strlen($query) * 1.5));
+            ->setParameter('minScore', round(strlen($query) * 0.8));
         if ($entity != null) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
@@ -89,7 +89,7 @@ class IndexRepository extends ServiceEntityRepository
                 if (class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     if ($reflection->implementsInterface(PreSearchInterface::class)) {
-                        $qb = (new $class)->preSearch($qb, $query, $entity, $field);
+                        (new $class)->preSearch($qb, $query, $entity, $field);
                     }
                 }
             }
@@ -97,23 +97,22 @@ class IndexRepository extends ServiceEntityRepository
 
         $result = $qb->getQuery()->getScalarResult();
 
-        $ids = [];
-        foreach ($result as $row) {
-            $ids[] = $row['foreignId'];
-        }
-
         // postSearch
         if ($searchableAnnotations) {
             if ($class = $searchableAnnotations->getPostSearch()) {
                 if (class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                        $ids = (new $class)->postSearch($ids);
+                        $result = (new $class)->postSearch($result, $query, $entity, $field);
                     }
                 }
             }
         }
 
+        $ids = [];
+        foreach ($result as $row) {
+            $ids[] = $row['foreignId'];
+        }
 
         return $ids;
     }
