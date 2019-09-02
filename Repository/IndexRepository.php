@@ -103,7 +103,7 @@ class IndexRepository extends ServiceEntityRepository
                 if (class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                        $result = (new $class)->postSearch($result);
+                        $result = (new $class)->postSearch($result, $query, $entity, $field);
                     }
                 }
             }
