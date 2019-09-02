@@ -115,7 +115,7 @@ class SearchCommand extends BaseCommand
 
         $table = new Table($output);
         $table
-            ->setHeaders(['Id', 'Entity']);
+            ->setHeaders(['Entity', 'Id']);
 
         foreach ($ids as $id) {
             $table->addRow([$targetEntity, $id]);
