@@ -51,8 +51,8 @@ class IndexRepository extends ServiceEntityRepository
 
     /**
      * @param $query
-     * @param string $entity
-     * @param string $field
+     * @param string|null $entity
+     * @param string|null $field
      * @return array
      */
     public function search($query, $entity = null, $field = null)
@@ -68,14 +68,16 @@ class IndexRepository extends ServiceEntityRepository
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%')
             ->setParameter('minScore', round(strlen($query) * 0.8));
-        if ($entity != null) {
+
+        if ($entity) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
         }
-        if ($field != null) {
+
+        if ($field) {
             $qb->andWhere('i.field = :fieldName')
                 ->setParameter('fieldName', $field);
-        };
+        }
 
         if ($entity) {
             // preSearch
@@ -96,7 +98,7 @@ class IndexRepository extends ServiceEntityRepository
                 }
             }
         }
-        
+
         $result = $qb->getQuery()->getScalarResult();
 
         if ($entity) {
@@ -112,7 +114,7 @@ class IndexRepository extends ServiceEntityRepository
                 }
             }
         }
-        
+
         $ids = [];
         foreach ($result as $row) {
             $ids[] = $row['foreignId'];
