@@ -77,38 +77,42 @@ class IndexRepository extends ServiceEntityRepository
                 ->setParameter('fieldName', $field);
         };
 
-        // preSearch
-        $reflection = new \ReflectionClass($entity);
-        $annotationReader = new AnnotationReader();
+        if ($entity) {
+            // preSearch
+            $reflection = new \ReflectionClass($entity);
+            $annotationReader = new AnnotationReader();
 
-        /** @var Searchable $searchableAnnotations */
-        $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
+            /** @var Searchable $searchableAnnotations */
+            $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
 
-        if ($searchableAnnotations) {
-            if ($class = $searchableAnnotations->getPreSearch()) {
-                if (class_exists($class)) {
-                    $reflection = new \ReflectionClass($class);
-                    if ($reflection->implementsInterface(PreSearchInterface::class)) {
-                        (new $class)->preSearch($qb, $query, $entity, $field);
+            if ($searchableAnnotations) {
+                if ($class = $searchableAnnotations->getPreSearch()) {
+                    if (class_exists($class)) {
+                        $reflection = new \ReflectionClass($class);
+                        if ($reflection->implementsInterface(PreSearchInterface::class)) {
+                            (new $class)->preSearch($qb, $query, $entity, $field);
+                        }
                     }
                 }
             }
         }
-
+        
         $result = $qb->getQuery()->getScalarResult();
 
-        // postSearch
-        if ($searchableAnnotations) {
-            if ($class = $searchableAnnotations->getPostSearch()) {
-                if (class_exists($class)) {
-                    $reflection = new \ReflectionClass($class);
-                    if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                        $result = (new $class)->postSearch($result, $query, $entity, $field);
+        if ($entity) {
+            // postSearch
+            if ($searchableAnnotations) {
+                if ($class = $searchableAnnotations->getPostSearch()) {
+                    if (class_exists($class)) {
+                        $reflection = new \ReflectionClass($class);
+                        if ($reflection->implementsInterface(PostSearchInterface::class)) {
+                            $result = (new $class)->postSearch($result, $query, $entity, $field);
+                        }
                     }
                 }
             }
         }
-
+        
         $ids = [];
         foreach ($result as $row) {
             $ids[] = $row['foreignId'];
