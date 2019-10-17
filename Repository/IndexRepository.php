@@ -51,8 +51,8 @@ class IndexRepository extends ServiceEntityRepository
 
     /**
      * @param $query
-     * @param string $entity
-     * @param string $field
+     * @param string|null $entity
+     * @param string|null $field
      * @return array
      */
     public function search($query, $entity = null, $field = null)
@@ -68,28 +68,32 @@ class IndexRepository extends ServiceEntityRepository
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%'.$query.'%')
             ->setParameter('minScore', round(strlen($query) * 0.8));
-        if ($entity != null) {
+
+        if ($entity) {
             $qb->andWhere('i.model = :entity')
                 ->setParameter('entity', $entity);
         }
-        if ($field != null) {
+
+        if ($field) {
             $qb->andWhere('i.field = :fieldName')
                 ->setParameter('fieldName', $field);
-        };
+        }
 
-        // preSearch
-        $reflection = new \ReflectionClass($entity);
-        $annotationReader = new AnnotationReader();
+        if ($entity) {
+            // preSearch
+            $reflection = new \ReflectionClass($entity);
+            $annotationReader = new AnnotationReader();
 
-        /** @var Searchable $searchableAnnotations */
-        $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
+            /** @var Searchable $searchableAnnotations */
+            $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
 
-        if ($searchableAnnotations) {
-            if ($class = $searchableAnnotations->getPreSearch()) {
-                if (class_exists($class)) {
-                    $reflection = new \ReflectionClass($class);
-                    if ($reflection->implementsInterface(PreSearchInterface::class)) {
-                        (new $class)->preSearch($qb, $query, $entity, $field);
+            if ($searchableAnnotations) {
+                if ($class = $searchableAnnotations->getPreSearch()) {
+                    if (class_exists($class)) {
+                        $reflection = new \ReflectionClass($class);
+                        if ($reflection->implementsInterface(PreSearchInterface::class)) {
+                            (new $class)->preSearch($qb, $query, $entity, $field);
+                        }
                     }
                 }
             }
@@ -97,13 +101,15 @@ class IndexRepository extends ServiceEntityRepository
 
         $result = $qb->getQuery()->getScalarResult();
 
-        // postSearch
-        if ($searchableAnnotations) {
-            if ($class = $searchableAnnotations->getPostSearch()) {
-                if (class_exists($class)) {
-                    $reflection = new \ReflectionClass($class);
-                    if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                        $result = (new $class)->postSearch($result, $query, $entity, $field);
+        if ($entity) {
+            // postSearch
+            if ($searchableAnnotations) {
+                if ($class = $searchableAnnotations->getPostSearch()) {
+                    if (class_exists($class)) {
+                        $reflection = new \ReflectionClass($class);
+                        if ($reflection->implementsInterface(PostSearchInterface::class)) {
+                            $result = (new $class)->postSearch($result, $query, $entity, $field);
+                        }
                     }
                 }
             }
