@@ -42,9 +42,9 @@ use whatwedo\SearchBundle\Entity\PreSearchInterface;
 class IndexRepository extends ServiceEntityRepository
 {
     /**
-     * @param RegistryInterface $registry
+     * @param \Doctrine\Common\Persistence\ManagerRegistry $registry
      */
-    public function __construct(RegistryInterface $registry)
+    public function __construct(\Doctrine\Common\Persistence\ManagerRegistry $registry)
     {
         parent::__construct($registry, Index::class);
     }

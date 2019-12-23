@@ -45,7 +45,7 @@ class IndexManager
 {
 
     /**
-     * @var RegistryInterface
+     * @var \Doctrine\Common\Persistence\ManagerRegistry
      */
     protected $doctrine;
 
@@ -56,9 +56,9 @@ class IndexManager
 
     /**
      * IndexManager constructor.
-     * @param RegistryInterface $doctrine
+     * @param \Doctrine\Common\Persistence\ManagerRegistry $doctrine
      */
-    public function __construct(RegistryInterface $doctrine)
+    public function __construct(\Doctrine\Common\Persistence\ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
     }
