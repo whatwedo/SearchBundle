@@ -119,12 +119,12 @@ class PopulateCommand extends BaseCommand
         $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
         if (!$entityExists) {
             $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
-            exit(1);
+            return 1;
         }
 
         if ($targetEntity && !in_array(str_replace('\\\\', '\\', $targetEntity), $entities)) {
             $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
-            exit(1);
+            return 1;
         }
 
         // Indexing entities
