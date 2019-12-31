@@ -28,7 +28,7 @@
 namespace whatwedo\SearchBundle\Manager;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -45,7 +45,7 @@ class IndexManager
 {
 
     /**
-     * @var \Doctrine\Common\Persistence\ManagerRegistry
+     * @var \Doctrine\Persistence\ManagerRegistry
      */
     protected $doctrine;
 
@@ -56,9 +56,9 @@ class IndexManager
 
     /**
      * IndexManager constructor.
-     * @param \Doctrine\Common\Persistence\ManagerRegistry $doctrine
+     * @param \Doctrine\Persistence\ManagerRegistry $doctrine
      */
-    public function __construct(\Doctrine\Common\Persistence\ManagerRegistry $doctrine)
+    public function __construct(\Doctrine\Persistence\ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
     }

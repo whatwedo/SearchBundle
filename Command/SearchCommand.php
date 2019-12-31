@@ -56,7 +56,7 @@ class SearchCommand extends BaseCommand
     protected $em;
 
     /**
-     * @var \Doctrine\Common\Persistence\ManagerRegistry
+     * @var \Doctrine\Persistence\ManagerRegistry
      */
     protected $doctrine;
 
@@ -72,11 +72,11 @@ class SearchCommand extends BaseCommand
 
     /**
      * PopulateCommand constructor.
-     * @param \Doctrine\Common\Persistence\ManagerRegistry $doctrine
+     * @param \Doctrine\Persistence\ManagerRegistry $doctrine
      * @param IndexManager $indexManager
      * @param FormatterManager $formatterManager
      */
-    public function __construct(\Doctrine\Common\Persistence\ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
+    public function __construct(\Doctrine\Persistence\ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
         parent::__construct(null);
 
