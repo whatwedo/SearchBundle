@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2016, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,22 +28,16 @@
 namespace whatwedo\SearchBundle\Manager;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\ResultSetMapping;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use whatwedo\SearchBundle\Annotation\Index;
-use whatwedo\SearchBundle\Exception\IdMethodNotFound;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
 /**
- * Class IndexManager
- * @package whatwedo\SearchBundle\Manager
+ * Class IndexManager.
  */
 class IndexManager
 {
-
     /**
      * @var \Doctrine\Persistence\ManagerRegistry
      */
@@ -56,7 +50,6 @@ class IndexManager
 
     /**
      * IndexManager constructor.
-     * @param \Doctrine\Persistence\ManagerRegistry $doctrine
      */
     public function __construct(\Doctrine\Persistence\ManagerRegistry $doctrine)
     {
@@ -64,27 +57,28 @@ class IndexManager
     }
 
     /**
-     * Flush index table
+     * Flush index table.
      */
     public function flush()
     {
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
         $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
-        if ($connection->getDatabasePlatform()->getName() == 'mysql') {
+        if ('mysql' === $connection->getDatabasePlatform()->getName()) {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
         }
         $query = $dbPlatform->getTruncateTableSql($tableName);
         $connection->executeUpdate($query);
-        if ($connection->getDatabasePlatform()->getName() == 'mysql') {
+        if ('mysql' === $connection->getDatabasePlatform()->getName()) {
             $connection->query('SET FOREIGN_KEY_CHECKS=1');
         }
     }
 
     /**
-     * Get indexes of given entity
+     * Get indexes of given entity.
      *
      * @param $entity
+     *
      * @return array
      */
     public function getIndexesOfEntity($entity)
@@ -94,21 +88,21 @@ class IndexManager
         $annotationReader = new AnnotationReader();
         foreach ($reflection->getProperties() as $property) {
             $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
-            if ($annotation != null) {
+            if (null !== $annotation) {
                 $fields[$property->getName()] = $annotation;
             }
         }
         foreach ($reflection->getMethods() as $method) {
             $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
-            if ($annotation != null) {
+            if (null !== $annotation) {
                 $fields[$method->getName()] = $annotation;
             }
         }
 
         // Check if entitiess exists
-        if ( isset($this->config['entities']) ) {
+        if (isset($this->config['entities'])) {
             foreach ($this->config['entities'] as $entityConfig) {
-                if ($entityConfig['class'] == $entity) {
+                if ($entityConfig['class'] === $entity) {
                     foreach ($entityConfig['fields'] as $fieldConfig) {
                         $annotation = new Index();
                         if (isset($fieldConfig['formatter'])) {
@@ -119,27 +113,31 @@ class IndexManager
                 }
             }
         }
+
         return $fields;
     }
 
     /**
      * Return true if there are at least one index in the
-     * given entity
+     * given entity.
      *
      * @param $entity
+     *
      * @return bool
      */
     public function hasEntityIndexes($entity)
     {
         $indexes = $this->getIndexesOfEntity($entity);
-        if (count($indexes) > 0) {
+        if (\count($indexes) > 0) {
             return true;
         }
+
         return false;
     }
 
     /**
-     * Get all entities with any defined index
+     * Get all entities with any defined index.
+     *
      * @return array
      */
     public function getIndexedEntities()
@@ -153,35 +151,40 @@ class IndexManager
                 $tables[] = $entity;
             }
         }
+
         return $tables;
     }
 
     /**
-     * Get id method
+     * Get id method.
      *
      * @param $entityName
+     *
      * @return string
      */
     public function getIdMethod($entityName)
     {
         $field = $this->getEntityManager()->getClassMetadata($entityName)->getSingleIdentifierFieldName();
+
         return $this->getFieldAccessorMethod($entityName, $field);
     }
 
     /**
-     * Get field accessor method
+     * Get field accessor method.
      *
      * @param $entityName
      * @param $field
-     * @return string
+     *
      * @throws MethodNotFoundException
+     *
+     * @return string
      */
     public function getFieldAccessorMethod($entityName, $field)
     {
         $prefixes = [
             'get',
             'is',
-            'has'
+            'has',
         ];
         if (method_exists($entityName, $field)) {
             return $field;
@@ -192,7 +195,7 @@ class IndexManager
                 return $method;
             }
         }
-        throw new MethodNotFoundException('Accessor method of field '.$field. ' of entity '.$entityName.' not found');
+        throw new MethodNotFoundException('Accessor method of field '.$field.' of entity '.$entityName.' not found');
     }
 
     /**
@@ -205,18 +208,18 @@ class IndexManager
 
     /**
      * @param array $config
+     *
      * @return IndexManager
      */
     public function setConfig($config)
     {
         $this->config = $config;
+
         return $this;
     }
 
-    /**
-     * @return EntityManager
-     */
-    protected function getEntityManager(): EntityManager {
+    protected function getEntityManager(): EntityManager
+    {
         return $this->doctrine->getManager();
     }
 }

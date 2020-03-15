@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2016, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,8 +30,7 @@ namespace whatwedo\SearchBundle\Annotation;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Class Index
- * @package whatwedo\SearchBundle\Annotation
+ * Class Index.
  *
  * @Annotation
  * @Target({"PROPERTY", "METHOD"})
@@ -57,25 +56,21 @@ class Index
 
     /**
      * @param string $formatter
+     *
      * @return Index
      */
     public function setFormatter($formatter)
     {
         $this->formatter = $formatter;
+
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getFormatterOptions(): array
     {
         return $this->formatterOptions;
     }
 
-    /**
-     * @param array $formatterOptions
-     */
     public function setFormatterOptions(array $formatterOptions): void
     {
         $this->formatterOptions = $formatterOptions;

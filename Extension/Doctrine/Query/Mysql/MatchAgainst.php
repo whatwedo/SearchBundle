@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2016, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,37 +27,25 @@
 
 namespace whatwedo\SearchBundle\Extension\Doctrine\Query\Mysql;
 
-use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\Parser;
+use Doctrine\ORM\Query\SqlWalker;
 
 /**
- * Class MatchAgainst
- * @package whatwedo\SearchBundle\Extension\Doctrine\Query\Mysql
- *
- * "MATCH_AGAINST" "(" {StateFieldPathExpression ","}* InParameter {Literal}? ")"
+ * Class MatchAgainst.
  */
-class MatchAgainst extends FunctionNode {
-
+class MatchAgainst extends FunctionNode
+{
     /**
      * @var array
      */
-    public $columns = array();
+    public $columns = [];
 
-    /**
-     * @var
-     */
     public $needle;
 
-    /**
-     * @var
-     */
     public $mode;
 
-    /**
-     * @param Parser $parser
-     */
     public function parse(Parser $parser)
     {
         $parser->match(Lexer::T_IDENTIFIER);
@@ -66,8 +54,7 @@ class MatchAgainst extends FunctionNode {
         do {
             $this->columns[] = $parser->StateFieldPathExpression();
             $parser->match(Lexer::T_COMMA);
-        }
-        while ($parser->getLexer()->isNextToken(Lexer::T_IDENTIFIER));
+        } while ($parser->getLexer()->isNextToken(Lexer::T_IDENTIFIER));
 
         $this->needle = $parser->InParameter();
 
@@ -79,7 +66,6 @@ class MatchAgainst extends FunctionNode {
     }
 
     /**
-     * @param SqlWalker $sqlWalker
      * @return string
      */
     public function getSql(SqlWalker $sqlWalker)
@@ -92,11 +78,11 @@ class MatchAgainst extends FunctionNode {
             $haystack .= $column->dispatch($sqlWalker);
         }
 
-        $query = 'MATCH(' . $haystack .
-            ') AGAINST (' . $this->needle->dispatch($sqlWalker);
+        $query = 'MATCH('.$haystack.
+            ') AGAINST ('.$this->needle->dispatch($sqlWalker);
 
-        if($this->mode && $this->mode->value != '') {
-            $query .= ' ' . trim($this->mode->dispatch($sqlWalker), "'") . ' )';
+        if ($this->mode && '' !== $this->mode->value) {
+            $query .= ' '.trim($this->mode->dispatch($sqlWalker), "'").' )';
         } else {
             $query .= ')';
         }

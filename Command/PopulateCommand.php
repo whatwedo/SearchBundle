@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2017, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,31 +28,28 @@
 namespace whatwedo\SearchBundle\Command;
 
 use Doctrine\ORM\EntityManager;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
-use whatwedo\CoreBundle\Formatter\FormatterInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
 /**
- * Class PopulateCommand
- * @package whatwedo\SearchBundle\Command
+ * Class PopulateCommand.
  */
 class PopulateCommand extends BaseCommand
 {
-
     /**
      * @var EntityManager
      */
     protected $em;
 
     /**
-     * @var \Doctrine\Persistence\ManagerRegistry
+     * @var ManagerRegistry
      */
     protected $doctrine;
 
@@ -68,11 +65,8 @@ class PopulateCommand extends BaseCommand
 
     /**
      * PopulateCommand constructor.
-     * @param \Doctrine\Persistence\ManagerRegistry $doctrine
-     * @param IndexManager $indexManager
-     * @param FormatterManager $formatterManager
      */
-    public function __construct(\Doctrine\Persistence\ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
+    public function __construct(ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
         parent::__construct(null);
 
@@ -82,7 +76,7 @@ class PopulateCommand extends BaseCommand
     }
 
     /**
-     * Configure command
+     * Configure command.
      */
     protected function configure()
     {
@@ -90,14 +84,14 @@ class PopulateCommand extends BaseCommand
             ->setName('whatwedo:search:populate')
             ->setDescription('Populate the search index')
             ->setHelp('This command populate the search index according to the entity annotations')
-            ->addArgument('entity', InputArgument::OPTIONAL, 'Only populate index for this entity');;
+            ->addArgument('entity', InputArgument::OPTIONAL, 'Only populate index for this entity');
     }
 
     protected function prePopulate()
     {
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output):int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Initialize command
         parent::execute($input, $output);
@@ -118,19 +112,21 @@ class PopulateCommand extends BaseCommand
 
         $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
         if (!$entityExists) {
-            $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
+            $this->log('Entity "'.$targetEntity.'" not a valid Doctrine entity!');
+
             return 1;
         }
 
-        if ($targetEntity && !in_array(str_replace('\\\\', '\\', $targetEntity), $entities)) {
-            $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
+        if ($targetEntity && !\in_array(str_replace('\\\\', '\\', $targetEntity), $entities, true)) {
+            $this->log('Entity "'.$targetEntity.'" not a indexed entity!');
+
             return 1;
         }
 
         // Indexing entities
         $runned = false;
         foreach ($entities as $entityName) {
-            if ($targetEntity && $entityName != str_replace('\\\\', '\\', $targetEntity)) {
+            if ($targetEntity && $entityName !== str_replace('\\\\', '\\', $targetEntity)) {
                 continue;
             }
             $this->indexEntity($entityName);
@@ -148,9 +144,10 @@ class PopulateCommand extends BaseCommand
     }
 
     /**
-     * Populate index of given entity
+     * Populate index of given entity.
      *
      * @param $entityName
+     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException
@@ -172,7 +169,7 @@ class PopulateCommand extends BaseCommand
         $entityCount = $this->em->getRepository($entityName)->count([]);
 
         // Initialize progress bar
-        $progress = new ProgressBar($this->output, $entityCount * count($indexes));
+        $progress = new ProgressBar($this->output, $entityCount * \count($indexes));
         $progress->start();
 
         $indexQuery = $this->em->createQueryBuilder()
@@ -222,11 +219,11 @@ class PopulateCommand extends BaseCommand
 
                 // Update progress bar every 200 iterations
                 // as well as gc
-                if ($i % 200 == 0) {
+                if (0 === $i % 200) {
                     $progress->setProgress($i);
                     $this->gc();
                 }
-                $i ++;
+                ++$i;
             }
             $this->em->detach($entity[0]);
         }
@@ -238,7 +235,7 @@ class PopulateCommand extends BaseCommand
     }
 
     /**
-     * Clean up garbage
+     * Clean up garbage.
      */
     protected function gc()
     {
@@ -246,15 +243,12 @@ class PopulateCommand extends BaseCommand
         gc_collect_cycles();
     }
 
-    protected function escape(?string $value) : ?string
+    protected function escape(?string $value): ?string
     {
-        if (strpos($value, '\\\\') == false) {
+        if (false === mb_strpos($value, '\\\\')) {
             $value = str_replace('\\', '\\\\', $value);
         }
 
         return $value;
-
     }
-
-
 }

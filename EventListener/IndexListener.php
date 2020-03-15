@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2016, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,41 +28,36 @@
 namespace whatwedo\SearchBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\DBAL\Statement;
-use Doctrine\ORM\Persisters\Entity\EntityPersister;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
-use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
 class IndexListener implements EventSubscriber
 {
-
     /**
      * @var IndexManager
      */
     protected $indexManager;
 
     /**
-     * @var Statement $indexInsertStmt
+     * @var Statement
      */
     protected $indexInsertStmt;
 
     /**
-     * @var Statement $indexUpdateStmt
+     * @var Statement
      */
     protected $indexUpdateStmt;
 
     /**
-     * @var FormatterManager $formatterManager
+     * @var FormatterManager
      */
     protected $formatterManager;
 
     /**
      * IndexListener constructor.
-     * @param IndexManager $indexManager
-     * @param FormatterManager $formatterManager
      */
     public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
     {
@@ -84,25 +79,16 @@ class IndexListener implements EventSubscriber
         ];
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
     public function postPersist(LifecycleEventArgs $args)
     {
         $this->index($args);
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
     public function postUpdate(LifecycleEventArgs $args)
     {
         $this->index($args);
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
     public function preRemove(LifecycleEventArgs $args)
     {
         $em = $args->getObjectManager();
@@ -110,7 +96,7 @@ class IndexListener implements EventSubscriber
         if ($entity instanceof Index) {
             return;
         }
-        $entityName = get_class($entity);
+        $entityName = \get_class($entity);
         if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
@@ -124,7 +110,7 @@ class IndexListener implements EventSubscriber
             $idMethod = $this->indexManager->getIdMethod($entityName);
             foreach ($indexes as $field => $index) {
                 $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
-                if ($entry != null) {
+                if (null !== $entry) {
                     $em->remove($entry);
                 }
             }
@@ -133,13 +119,10 @@ class IndexListener implements EventSubscriber
         $em->flush();
     }
 
-    /**
-     * @param LifecycleEventArgs $args
-     */
     public function index(LifecycleEventArgs $args)
     {
         $em = $args->getObjectManager();
-        if (is_null($this->indexInsertStmt)) {
+        if (null === $this->indexInsertStmt) {
             $indexPersister = $em->getUnitOfWork()->getEntityPersister(Index::class);
             $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
             $rmIndexInsertSQL->setAccessible(true);
@@ -157,7 +140,7 @@ class IndexListener implements EventSubscriber
         if ($entity instanceof Index) {
             return;
         }
-        $entityName = get_class($entity);
+        $entityName = \get_class($entity);
         if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
@@ -199,15 +182,17 @@ class IndexListener implements EventSubscriber
     }
 
     /**
-     * Get class tree
+     * Get class tree.
      *
      * @param $className
+     *
      * @return array
      */
     protected function getClassTree($className)
     {
         $classes = class_parents($className);
         array_unshift($classes, $className);
+
         return $classes;
     }
 }

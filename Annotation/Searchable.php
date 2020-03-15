@@ -1,21 +1,17 @@
 <?php
 
-
 namespace whatwedo\SearchBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
 
-
 /**
- * Class Searchable
- * @package whatwedo\SearchBundle\Annotation
+ * Class Searchable.
  *
  * @Annotation
  * @Target({"CLASS"})
  */
 class Searchable
 {
-
     /**
      * @var string
      */
@@ -41,6 +37,4 @@ class Searchable
     {
         return $this->postSearch;
     }
-
-
 }
