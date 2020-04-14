@@ -29,17 +29,15 @@ namespace whatwedo\SearchBundle\Manager;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use whatwedo\SearchBundle\Annotation\Index;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
-/**
- * Class IndexManager.
- */
 class IndexManager
 {
     /**
-     * @var \Doctrine\Persistence\ManagerRegistry
+     * @var ManagerRegistry
      */
     protected $doctrine;
 
@@ -51,7 +49,7 @@ class IndexManager
     /**
      * IndexManager constructor.
      */
-    public function __construct(\Doctrine\Persistence\ManagerRegistry $doctrine)
+    public function __construct(ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
     }
@@ -209,7 +207,7 @@ class IndexManager
     /**
      * @param array $config
      *
-     * @return IndexManager
+     * @return self
      */
     public function setConfig($config)
     {

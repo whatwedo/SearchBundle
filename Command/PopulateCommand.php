@@ -38,9 +38,6 @@ use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
-/**
- * Class PopulateCommand.
- */
 class PopulateCommand extends BaseCommand
 {
     /**
@@ -63,9 +60,6 @@ class PopulateCommand extends BaseCommand
      */
     protected $formatterManager;
 
-    /**
-     * PopulateCommand constructor.
-     */
     public function __construct(ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
         parent::__construct(null);
@@ -178,8 +172,7 @@ class PopulateCommand extends BaseCommand
             ->where('e.model = :model')
             ->andWhere('e.foreignId = :foreignId')
             ->andWhere('e.field = :field')
-            ->setMaxResults(1)
-        ;
+            ->setMaxResults(1);
 
         $i = 0;
         foreach ($entities as $entity) {
@@ -192,13 +185,13 @@ class PopulateCommand extends BaseCommand
                 if (method_exists($formatter, 'processOptions')) {
                     $formatter->processOptions($index->getFormatterOptions());
                 }
-                $content = $formatter->getString($entity[0]->$fieldMethod());
+                $content = $formatter->getString($entity[0]->{$fieldMethod}());
 
                 // Persist entry
                 if (!empty($content)) {
                     $entry = $indexQuery->setParameters([
                         'model' => $entityName,
-                        'foreignId' => $entity[0]->$idMethod(),
+                        'foreignId' => $entity[0]->{$idMethod}(),
                         'field' => $field,
                     ])->getQuery()->getOneOrNullResult();
 
@@ -207,7 +200,7 @@ class PopulateCommand extends BaseCommand
                     }
 
                     $entry->setModel($entityName)
-                        ->setForeignId($entity[0]->$idMethod())
+                        ->setForeignId($entity[0]->{$idMethod}())
                         ->setField($field)
                         ->setContent($content);
 

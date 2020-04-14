@@ -16,9 +16,6 @@ use whatwedo\SearchBundle\Manager\IndexManager;
  */
 class whatwedoSearchExtension extends Extension
 {
-    /**
-     * {@inheritdoc}
-     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();

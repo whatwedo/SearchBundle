@@ -30,8 +30,6 @@ namespace whatwedo\SearchBundle\Annotation;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Class Index.
- *
  * @Annotation
  * @Target({"PROPERTY", "METHOD"})
  */
@@ -41,6 +39,7 @@ class Index
      * @var string
      */
     public $formatter = 'whatwedo\CoreBundle\Formatter\DefaultFormatter';
+
     /**
      * @var array
      */
@@ -57,7 +56,7 @@ class Index
     /**
      * @param string $formatter
      *
-     * @return Index
+     * @return self
      */
     public function setFormatter($formatter)
     {

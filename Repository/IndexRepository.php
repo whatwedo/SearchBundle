@@ -34,9 +34,6 @@ use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Entity\PostSearchInterface;
 use whatwedo\SearchBundle\Entity\PreSearchInterface;
 
-/**
- * Class IndexRepository.
- */
 class IndexRepository extends ServiceEntityRepository
 {
     public function __construct(\Doctrine\Persistence\ManagerRegistry $registry)
@@ -84,12 +81,11 @@ class IndexRepository extends ServiceEntityRepository
             $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
 
             if ($searchableAnnotations) {
-                if ($class = $searchableAnnotations->getPreSearch()) {
-                    if (class_exists($class)) {
-                        $reflection = new \ReflectionClass($class);
-                        if ($reflection->implementsInterface(PreSearchInterface::class)) {
-                            (new $class())->preSearch($qb, $query, $entity, $field);
-                        }
+                $class = $searchableAnnotations->getPreSearch();
+                if ($class && class_exists($class)) {
+                    $reflection = new \ReflectionClass($class);
+                    if ($reflection->implementsInterface(PreSearchInterface::class)) {
+                        (new $class())->preSearch($qb, $query, $entity, $field);
                     }
                 }
             }
@@ -100,12 +96,11 @@ class IndexRepository extends ServiceEntityRepository
         if ($entity) {
             // postSearch
             if ($searchableAnnotations) {
-                if ($class = $searchableAnnotations->getPostSearch()) {
-                    if (class_exists($class)) {
-                        $reflection = new \ReflectionClass($class);
-                        if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                            $result = (new $class())->postSearch($result, $query, $entity, $field);
-                        }
+                $class = $searchableAnnotations->getPostSearch();
+                if ($class && class_exists($class)) {
+                    $reflection = new \ReflectionClass($class);
+                    if ($reflection->implementsInterface(PostSearchInterface::class)) {
+                        $result = (new $class())->postSearch($result, $query, $entity, $field);
                     }
                 }
             }

@@ -5,8 +5,6 @@ namespace whatwedo\SearchBundle\Annotation;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Class Searchable.
- *
  * @Annotation
  * @Target({"CLASS"})
  */

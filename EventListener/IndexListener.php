@@ -108,8 +108,8 @@ class IndexListener implements EventSubscriber
             }
             $indexes = $this->indexManager->getIndexesOfEntity($class);
             $idMethod = $this->indexManager->getIdMethod($entityName);
-            foreach ($indexes as $field => $index) {
-                $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
+            foreach (array_keys($indexes) as $field) {
+                $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
                 if (null !== $entry) {
                     $em->remove($entry);
                 }
@@ -162,11 +162,11 @@ class IndexListener implements EventSubscriber
                 if (method_exists($formatter, 'processOptions')) {
                     $formatter->processOptions($index->getFormatterOptions());
                 }
-                $content = $formatter->getString($entity->$fieldMethod());
+                $content = $formatter->getString($entity->{$fieldMethod}());
                 if (!empty($content)) {
-                    $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->$idMethod());
+                    $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
                     if (!$entry) {
-                        $this->indexInsertStmt->bindValue(1, $entity->$idMethod());
+                        $this->indexInsertStmt->bindValue(1, $entity->{$idMethod}());
                         $this->indexInsertStmt->bindValue(2, $class);
                         $this->indexInsertStmt->bindValue(3, $field);
                         $this->indexInsertStmt->bindValue(4, $content);

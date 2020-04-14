@@ -39,9 +39,6 @@ use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\IndexRepository;
 
-/**
- * Class PopulateCommand.
- */
 class SearchCommand extends BaseCommand
 {
     /**
@@ -64,9 +61,6 @@ class SearchCommand extends BaseCommand
      */
     protected $formatterManager;
 
-    /**
-     * PopulateCommand constructor.
-     */
     public function __construct(ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
         parent::__construct(null);

@@ -27,9 +27,6 @@
 
 namespace whatwedo\SearchBundle\Exception;
 
-/**
- * Class MethodNotFoundException.
- */
 class MethodNotFoundException extends \Exception
 {
 }
