@@ -106,7 +106,7 @@ class PopulateCommand extends BaseCommand
 
         // Flush index
         $this->log('Flushing index table');
-        //$this->indexManager->flush();
+        $this->indexManager->flush();
 
         $targetEntity = $this->escape($input->getArgument('entity'));
 
