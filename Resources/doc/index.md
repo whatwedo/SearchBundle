@@ -77,7 +77,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 Now and after every database change which are not performed by Doctrine, you have to update your index.
 
 ```
-bin/console whatwedo:search:populate
+php bin/console whatwedo:search:populate
 ```
 
 Now you can use the Index repository to search in your entities
@@ -92,7 +92,7 @@ Now you can use the Index repository to search in your entities
         $ids = $this->em->getRepository('whatwedoSearchBundle:Index')->search($query, User::class);
         
         // Map users
-        $users $this->em->getRepository('AgencyUserBundle:User')
+        $users = $this->em->getRepository('AgencyUserBundle:User')
             ->createQueryBuilder('u')
             ->where('u.id IN (:ids)')->setParameter('ids', $ids)
             ->getQuery()
