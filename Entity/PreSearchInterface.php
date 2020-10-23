@@ -1,8 +1,6 @@
 <?php
 
-
 namespace whatwedo\SearchBundle\Entity;
-
 
 use Doctrine\ORM\QueryBuilder;
 

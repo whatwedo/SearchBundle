@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2017, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,35 +28,26 @@
 namespace whatwedo\SearchBundle\Command;
 
 use Doctrine\ORM\EntityManager;
-use Socius\Entity\Member;
-use Symfony\Bridge\Doctrine\RegistryInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableRows;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
-use whatwedo\CoreBundle\Formatter\FormatterInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\IndexRepository;
 
-/**
- * Class PopulateCommand
- * @package whatwedo\SearchBundle\Command
- */
 class SearchCommand extends BaseCommand
 {
-
     /**
      * @var EntityManager
      */
     protected $em;
 
     /**
-     * @var RegistryInterface
+     * @var ManagerRegistry
      */
     protected $doctrine;
 
@@ -70,13 +61,7 @@ class SearchCommand extends BaseCommand
      */
     protected $formatterManager;
 
-    /**
-     * PopulateCommand constructor.
-     * @param RegistryInterface $doctrine
-     * @param IndexManager $indexManager
-     * @param FormatterManager $formatterManager
-     */
-    public function __construct(RegistryInterface $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
+    public function __construct(ManagerRegistry $doctrine, IndexManager $indexManager, FormatterManager $formatterManager)
     {
         parent::__construct(null);
 
@@ -86,7 +71,7 @@ class SearchCommand extends BaseCommand
     }
 
     /**
-     * Configure command
+     * Configure command.
      */
     protected function configure()
     {
@@ -98,12 +83,10 @@ class SearchCommand extends BaseCommand
             ->addArgument('query', InputArgument::REQUIRED, 'The Query string');
     }
 
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Initialize command
         parent::execute($input, $output);
-
 
         /** @var IndexRepository $indexRepo */
         $indexRepo = $this->doctrine->getRepository(Index::class);
@@ -111,7 +94,6 @@ class SearchCommand extends BaseCommand
         $targetEntity = $input->getArgument('entity');
 
         $ids = $indexRepo->search($input->getArgument('query'), $targetEntity);
-
 
         $table = new Table($output);
         $table
@@ -122,6 +104,7 @@ class SearchCommand extends BaseCommand
         }
 
         $table->render();
-    }
 
+        return 0;
+    }
 }
