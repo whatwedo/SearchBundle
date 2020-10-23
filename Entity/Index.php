@@ -1,7 +1,7 @@
 <?php
 /**
  * Copyright (c) 2016, whatwedo GmbH
- * All rights reserved
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,9 +30,6 @@ namespace whatwedo\SearchBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class SearchIndex
- * @package whatwedo\SearchBundle\Entity
- *
  * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Repository\IndexRepository")
  * @ORM\Table(
  *     name="whatwedo_search_index",
@@ -54,9 +51,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Index
 {
-
     /**
-     * @var int $id
+     * @var int
      *
      * @ORM\Column(name="id", type="bigint", nullable=false)
      * @ORM\Id
@@ -65,7 +61,7 @@ class Index
     protected $id;
 
     /**
-     * @var integer
+     * @var int
      *
      * @ORM\Column(name="foreign_id", type="integer", nullable=false)
      */
@@ -102,11 +98,13 @@ class Index
 
     /**
      * @param int $id
-     * @return Index
+     *
+     * @return self
      */
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -120,11 +118,13 @@ class Index
 
     /**
      * @param int $foreignId
-     * @return Index
+     *
+     * @return self
      */
     public function setForeignId($foreignId)
     {
         $this->foreignId = $foreignId;
+
         return $this;
     }
 
@@ -138,11 +138,13 @@ class Index
 
     /**
      * @param string $model
-     * @return Index
+     *
+     * @return self
      */
     public function setModel($model)
     {
         $this->model = $model;
+
         return $this;
     }
 
@@ -156,11 +158,13 @@ class Index
 
     /**
      * @param string $field
-     * @return Index
+     *
+     * @return self
      */
     public function setField($field)
     {
         $this->field = $field;
+
         return $this;
     }
 
@@ -174,11 +178,13 @@ class Index
 
     /**
      * @param string $content
-     * @return Index
+     *
+     * @return self
      */
     public function setContent($content)
     {
         $this->content = $content;
+
         return $this;
     }
 }
