@@ -37,6 +37,7 @@ use whatwedo\CoreBundle\Command\BaseCommand;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
+use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class PopulateCommand extends BaseCommand
 {
@@ -148,33 +149,47 @@ class PopulateCommand extends BaseCommand
      */
     protected function indexEntity($entityName)
     {
-        $this->log('Indexing of entity '.$entityName);
+        $entityClass = new \ReflectionClass($entityName);
+        if ($entityClass->isAbstract()) {
+            return;
+        }
+
+        /** @var Connection $connection */
+        $connection = $this->doctrine->getConnection();
+        $this->log('Indexing of entity ' . $entityName);
 
         // Get required meta information
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
         $idMethod = $this->indexManager->getIdMethod($entityName);
 
-        // get clean QueryBuilder
-        $queryBuilder = $this->em->createQueryBuilder();
-        $queryBuilder->from($entityName, 'e')->select('e');
+        $repository = $this->doctrine->getRepository($entityName);
+
+        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
+            $queryBuilder = $repository->getCustomSearchPopulateQueryBuilder();
+        } else {
+            // get clean QueryBuilder
+            $queryBuilder = $this->doctrine->getManager()->createQueryBuilder();
+            $queryBuilder->from($entityName, 'e')->select('e');
+        }
 
         // Get entities
         $entities = $queryBuilder->getQuery()->iterate();
-        $entityCount = $this->em->getRepository($entityName)->count([]);
+        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
+            $entityCount = $repository->customSearchPopulateCount();
+        } else {
+            $entityCount = $this->doctrine->getRepository($entityName)->count([]);
+        }
+
 
         // Initialize progress bar
-        $progress = new ProgressBar($this->output, $entityCount * \count($indexes));
+        $progress = new ProgressBar($this->output, $entityCount * count($indexes));
         $progress->start();
 
-        $indexQuery = $this->em->createQueryBuilder()
-            ->from(Index::class, 'e')
-            ->select('e')
-            ->where('e.model = :model')
-            ->andWhere('e.foreignId = :foreignId')
-            ->andWhere('e.field = :field')
-            ->setMaxResults(1);
-
         $i = 0;
+
+        $insertData = [];
+        $insertSqlParts = [];
+
         foreach ($entities as $entity) {
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
             foreach ($indexes as $field => $index) {
@@ -182,49 +197,51 @@ class PopulateCommand extends BaseCommand
 
                 // Get content
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
-                if (method_exists($formatter, 'processOptions')) {
-                    $formatter->processOptions($index->getFormatterOptions());
-                }
-                $content = $formatter->getString($entity[0]->{$fieldMethod}());
+                $formatter->processOptions($index->getFormatterOptions());
+                $content = $formatter->getString($entity[0]->$fieldMethod());
 
                 // Persist entry
                 if (!empty($content)) {
-                    $entry = $indexQuery->setParameters([
-                        'model' => $entityName,
-                        'foreignId' => $entity[0]->{$idMethod}(),
-                        'field' => $field,
-                    ])->getQuery()->getOneOrNullResult();
-
-                    if (!$entry) {
-                        $entry = new Index();
-                    }
-
-                    $entry->setModel($entityName)
-                        ->setForeignId($entity[0]->{$idMethod}())
-                        ->setField($field)
-                        ->setContent($content);
-
-                    if (!$entry->getId()) {
-                        $this->em->persist($entry);
-                    }
-                    $this->em->flush($entry);
+                    $insertData[] = $entity[0]->$idMethod();
+                    $insertData[] = $entityName;
+                    $insertData[] = $field;
+                    $insertData[] = (string)$content;
+                    $insertSqlParts[] = '(?,?,?,?)';
                 }
 
                 // Update progress bar every 200 iterations
                 // as well as gc
-                if (0 === $i % 200) {
+                if ($i % 200 == 0) {
+                    if (count($insertData)) {
+                        $this->bulkInsert($insertSqlParts, $insertData, $connection);
+                    }
+                    $insertSqlParts = [];
+                    $insertData = [];
+
                     $progress->setProgress($i);
                     $this->gc();
                 }
-                ++$i;
+                $i++;
             }
-            $this->em->detach($entity[0]);
         }
+
+        if (count($insertData)) {
+            $this->bulkInsert($insertSqlParts, $insertData, $connection);
+        }
+
         $this->gc();
 
         // Tear down progress bar
         $progress->finish();
         $this->output->write(PHP_EOL);
+
+    }
+
+
+    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
+    {
+        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
+        $bulkInsertStatetment->execute($insertData);
     }
 
     /**
