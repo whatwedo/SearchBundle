@@ -76,6 +76,8 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 Now and after every database change which are not performed by Doctrine, you have to update your index.
 
+Read more about populating your [here](indexing.md)
+
 ```
 php bin/console whatwedo:search:populate
 ```
@@ -113,3 +115,4 @@ That's it!
 ### More resources
 
 - [Configuration](configuration.md)
+- [Indexing](indexing.md)
