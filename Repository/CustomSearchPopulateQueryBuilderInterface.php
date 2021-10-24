@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Repository;
-
 
 use Doctrine\ORM\QueryBuilder;
 

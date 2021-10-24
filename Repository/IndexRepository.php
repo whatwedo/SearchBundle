@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Copyright (c) 2016, whatwedo GmbH
  * All rights reserved.
@@ -59,7 +61,7 @@ class IndexRepository extends ServiceEntityRepository
             ->addGroupBy('_matchQuote')
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
-            ->setParameter('queryWildcard', '%'.$query.'%')
+            ->setParameter('queryWildcard', '%' . $query . '%')
             ->setParameter('minScore', round(\mb_strlen($query) * 0.8));
 
         if ($entity) {

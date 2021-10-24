@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Copyright (c) 2016, whatwedo GmbH
  * All rights reserved.
@@ -46,9 +48,6 @@ class IndexManager
      */
     protected $config = [];
 
-    /**
-     * IndexManager constructor.
-     */
     public function __construct(ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
@@ -62,12 +61,12 @@ class IndexManager
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
         $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
-        if ('mysql' === $connection->getDatabasePlatform()->getName()) {
+        if ($connection->getDatabasePlatform()->getName() === 'mysql') {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
         }
         $query = $dbPlatform->getTruncateTableSql($tableName);
         $connection->executeUpdate($query);
-        if ('mysql' === $connection->getDatabasePlatform()->getName()) {
+        if ($connection->getDatabasePlatform()->getName() === 'mysql') {
             $connection->query('SET FOREIGN_KEY_CHECKS=1');
         }
     }
@@ -86,13 +85,13 @@ class IndexManager
         $annotationReader = new AnnotationReader();
         foreach ($reflection->getProperties() as $property) {
             $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
-            if (null !== $annotation) {
+            if ($annotation !== null) {
                 $fields[$property->getName()] = $annotation;
             }
         }
         foreach ($reflection->getMethods() as $method) {
             $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
-            if (null !== $annotation) {
+            if ($annotation !== null) {
                 $fields[$method->getName()] = $annotation;
             }
         }
@@ -188,12 +187,12 @@ class IndexManager
             return $field;
         }
         foreach ($prefixes as $prefix) {
-            $method = $prefix.ucfirst($field);
+            $method = $prefix . ucfirst($field);
             if (method_exists($entityName, $method)) {
                 return $method;
             }
         }
-        throw new MethodNotFoundException('Accessor method of field '.$field.' of entity '.$entityName.' not found');
+        throw new MethodNotFoundException('Accessor method of field ' . $field . ' of entity ' . $entityName . ' not found');
     }
 
     /**

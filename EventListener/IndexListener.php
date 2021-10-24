@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Copyright (c) 2016, whatwedo GmbH
  * All rights reserved.
@@ -56,9 +58,6 @@ class IndexListener implements EventSubscriber
      */
     protected $formatterManager;
 
-    /**
-     * IndexListener constructor.
-     */
     public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
     {
         $this->indexManager = $indexManager;
@@ -97,13 +96,13 @@ class IndexListener implements EventSubscriber
             return;
         }
         $entityName = \get_class($entity);
-        if (!$this->indexManager->hasEntityIndexes($entityName)) {
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$em->getMetadataFactory()->hasMetadataFor($class)
-                || !$this->indexManager->hasEntityIndexes($class)) {
+            if (! $em->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
             $indexes = $this->indexManager->getIndexesOfEntity($class);
@@ -141,14 +140,14 @@ class IndexListener implements EventSubscriber
             return;
         }
         $entityName = \get_class($entity);
-        if (!$this->indexManager->hasEntityIndexes($entityName)) {
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$em->getMetadataFactory()->hasMetadataFor($class)
-                || !$this->indexManager->hasEntityIndexes($class)) {
+            if (! $em->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
 
@@ -163,9 +162,9 @@ class IndexListener implements EventSubscriber
                     $formatter->processOptions($index->getFormatterOptions());
                 }
                 $content = $formatter->getString($entity->{$fieldMethod}());
-                if (!empty($content)) {
+                if (! empty($content)) {
                     $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
-                    if (!$entry) {
+                    if (! $entry) {
                         $this->indexInsertStmt->bindValue(1, $entity->{$idMethod}());
                         $this->indexInsertStmt->bindValue(2, $class);
                         $this->indexInsertStmt->bindValue(3, $field);

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Copyright (c) 2017, whatwedo GmbH
  * All rights reserved.
@@ -103,16 +105,16 @@ class PopulateCommand extends BaseCommand
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
-        $targetEntity = $this->escape($input->getArgument('entity'));
+        $targetEntity = $this->escape((string)$input->getArgument('entity'));
 
         $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
-        if (!$entityExists) {
+        if (! $entityExists) {
             $this->log('Entity "'.$targetEntity.'" not a valid Doctrine entity!');
 
             return 1;
         }
 
-        if ($targetEntity && !\in_array(str_replace('\\\\', '\\', $targetEntity), $entities, true)) {
+        if ($targetEntity && ! \in_array(str_replace('\\\\', '\\', $targetEntity), $entities, true)) {
             $this->log('Entity "'.$targetEntity.'" not a indexed entity!');
 
             return 1;
@@ -128,7 +130,7 @@ class PopulateCommand extends BaseCommand
             $runned = true;
         }
 
-        if (!$runned) {
+        if (! $runned) {
             $this->log('Indexer not runned!');
         }
 
@@ -156,7 +158,7 @@ class PopulateCommand extends BaseCommand
 
         /** @var Connection $connection */
         $connection = $this->doctrine->getConnection();
-        $this->log('Indexing of entity ' . $entityName);
+        $this->log('Indexing of entity '.$entityName);
 
         // Get required meta information
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
@@ -172,14 +174,12 @@ class PopulateCommand extends BaseCommand
             $queryBuilder->from($entityName, 'e')->select('e');
         }
 
-        // Get entities
         $entities = $queryBuilder->getQuery()->iterate();
         if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
             $entityCount = $repository->customSearchPopulateCount();
         } else {
             $entityCount = $this->doctrine->getRepository($entityName)->count([]);
         }
-
 
         // Initialize progress bar
         $progress = new ProgressBar($this->output, $entityCount * count($indexes));
@@ -195,23 +195,22 @@ class PopulateCommand extends BaseCommand
             foreach ($indexes as $field => $index) {
                 $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
 
-                // Get content
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
                 $formatter->processOptions($index->getFormatterOptions());
-                $content = $formatter->getString($entity[0]->$fieldMethod());
+                $content = $formatter->getString($entity[0]->{$fieldMethod}());
 
                 // Persist entry
-                if (!empty($content)) {
-                    $insertData[] = $entity[0]->$idMethod();
+                if (! empty($content)) {
+                    $insertData[] = $entity[0]->{$idMethod}();
                     $insertData[] = $entityName;
                     $insertData[] = $field;
-                    $insertData[] = (string)$content;
+                    $insertData[] = (string) $content;
                     $insertSqlParts[] = '(?,?,?,?)';
                 }
 
                 // Update progress bar every 200 iterations
                 // as well as gc
-                if ($i % 200 == 0) {
+                if (0 === $i % 200) {
                     if (count($insertData)) {
                         $this->bulkInsert($insertSqlParts, $insertData, $connection);
                     }
@@ -221,7 +220,7 @@ class PopulateCommand extends BaseCommand
                     $progress->setProgress($i);
                     $this->gc();
                 }
-                $i++;
+                ++$i;
             }
         }
 
@@ -234,14 +233,6 @@ class PopulateCommand extends BaseCommand
         // Tear down progress bar
         $progress->finish();
         $this->output->write(PHP_EOL);
-
-    }
-
-
-    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
-    {
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
-        $bulkInsertStatetment->execute($insertData);
     }
 
     /**
@@ -253,12 +244,18 @@ class PopulateCommand extends BaseCommand
         gc_collect_cycles();
     }
 
-    protected function escape(?string $value): ?string
+    protected function escape(string $value): string
     {
         if (false === mb_strpos($value, '\\\\')) {
             $value = str_replace('\\', '\\\\', $value);
         }
 
         return $value;
+    }
+
+    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
+    {
+        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES '.implode(',', $insertSqlParts));
+        $bulkInsertStatetment->execute($insertData);
     }
 }
