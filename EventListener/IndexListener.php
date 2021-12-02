@@ -91,11 +91,21 @@ class IndexListener implements EventSubscriber
 
     public function preRemove(LifecycleEventArgs $args)
     {
+        static $visited = [];
+
         $em = $args->getObjectManager();
         $entity = $args->getObject();
         if ($entity instanceof Index) {
             return;
         }
+
+        // Prevent infinite recursion
+        $oid = spl_object_hash($entity);
+        if (isset($visited[$oid])) {
+            return;
+        }
+        $visited[$oid] = true;
+
         $entityName = \get_class($entity);
         if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
