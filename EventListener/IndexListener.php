@@ -57,6 +57,18 @@ class IndexListener implements EventSubscriber
     protected $formatterManager;
 
     /**
+     * Prevent infinite recursion
+     * @var array
+     */
+    protected static $indexVisited = [];
+
+    /**
+     * Prevent infinite recursion
+     * @var array
+     */
+    protected static $removeVisited = [];
+
+    /**
      * IndexListener constructor.
      */
     public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
@@ -96,6 +108,11 @@ class IndexListener implements EventSubscriber
         if ($entity instanceof Index) {
             return;
         }
+        $oid = spl_object_hash($entity);
+        if (isset(static::$removeVisited[$oid])) {
+            return;
+        }
+        static::$removeVisited[$oid] = true;
         $entityName = \get_class($entity);
         if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
@@ -140,6 +157,11 @@ class IndexListener implements EventSubscriber
         if ($entity instanceof Index) {
             return;
         }
+        $oid = spl_object_hash($entity);
+        if (isset(static::$indexVisited[$oid])) {
+            return;
+        }
+        static::$indexVisited[$oid] = true;
         $entityName = \get_class($entity);
         if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
