@@ -35,6 +35,7 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target({"PROPERTY", "METHOD"})
  */
+#[\Attribute] 
 class Index
 {
     /**

@@ -80,21 +80,8 @@ class IndexManager
      */
     public function getIndexesOfEntity($entity)
     {
-        $fields = [];
-        $reflection = new \ReflectionClass($entity);
-        $annotationReader = new AnnotationReader();
-        foreach ($reflection->getProperties() as $property) {
-            $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
-            if ($annotation !== null) {
-                $fields[$property->getName()] = $annotation;
-            }
-        }
-        foreach ($reflection->getMethods() as $method) {
-            $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
-            if ($annotation !== null) {
-                $fields[$method->getName()] = $annotation;
-            }
-        }
+        $fields = $this->getAnnotationFields($entity);
+        $fields = array_merge($fields, $this->getAttrubuteFields($entity));
 
         // Check if entitiess exists
         if (isset($this->config['entities'])) {
@@ -218,5 +205,48 @@ class IndexManager
     protected function getEntityManager(): EntityManager
     {
         return $this->doctrine->getManager();
+    }
+
+    protected function getAnnotationFields(string $entity): array
+    {
+        $fields = [];
+        $reflection = new \ReflectionClass($entity);
+        $annotationReader = new AnnotationReader();
+        foreach ($reflection->getProperties() as $property) {
+            $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
+            if ($annotation !== null) {
+                $fields[$property->getName()] = $annotation;
+            }
+        }
+        foreach ($reflection->getMethods() as $method) {
+            $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
+            if ($annotation !== null) {
+                $fields[$method->getName()] = $annotation;
+            }
+        }
+        return $fields;
+    }
+
+    protected function getAttrubuteFields(string $entity): array
+    {
+        $fields = [];
+        $reflection = new \ReflectionClass($entity);
+        foreach ($reflection->getMethods() as $reflectionMethod) {
+            $methodAttributes = $reflectionMethod->getAttributes();
+            foreach ($methodAttributes as $attribute) {
+                if ($attribute->getName() == Index::class) {
+                    $fields[$reflectionMethod->getName()] = $attribute->newInstance();
+                }
+            }
+        }
+        foreach ($reflection->getProperties() as $reflectionProperty) {
+            $propertyAttributes = $reflectionProperty->getAttributes();
+            foreach ($propertyAttributes as $attribute) {
+                if ($attribute->getName() == Index::class) {
+                    $fields[$reflectionProperty->getName()] = $attribute->newInstance();
+                }
+            }
+        }
+        return $fields;
     }
 }
