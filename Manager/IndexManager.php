@@ -38,15 +38,9 @@ use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
 class IndexManager
 {
-    /**
-     * @var ManagerRegistry
-     */
-    protected $doctrine;
+    protected ManagerRegistry $doctrine;
 
-    /**
-     * @var array
-     */
-    protected $config = [];
+    protected array $config = [];
 
     public function __construct(ManagerRegistry $doctrine)
     {
@@ -56,7 +50,7 @@ class IndexManager
     /**
      * Flush index table.
      */
-    public function flush()
+    public function flush(): void
     {
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
@@ -73,12 +67,8 @@ class IndexManager
 
     /**
      * Get indexes of given entity.
-     *
-     * @param $entity
-     *
-     * @return array
      */
-    public function getIndexesOfEntity($entity)
+    public function getIndexesOfEntity(string $entity): array
     {
         $fields = $this->getAnnotationFields($entity);
         $fields = array_merge($fields, $this->getAttrubuteFields($entity));
@@ -104,12 +94,8 @@ class IndexManager
     /**
      * Return true if there are at least one index in the
      * given entity.
-     *
-     * @param $entity
-     *
-     * @return bool
      */
-    public function hasEntityIndexes($entity)
+    public function hasEntityIndexes(string $entity): bool
     {
         $indexes = $this->getIndexesOfEntity($entity);
         if (\count($indexes) > 0) {
@@ -121,10 +107,8 @@ class IndexManager
 
     /**
      * Get all entities with any defined index.
-     *
-     * @return array
      */
-    public function getIndexedEntities()
+    public function getIndexedEntities(): array
     {
         $tables = [];
         $metaTables = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
@@ -141,12 +125,8 @@ class IndexManager
 
     /**
      * Get id method.
-     *
-     * @param $entityName
-     *
-     * @return string
      */
-    public function getIdMethod($entityName)
+    public function getIdMethod(string $entityName): string
     {
         $field = $this->getEntityManager()->getClassMetadata($entityName)->getSingleIdentifierFieldName();
 
@@ -156,14 +136,9 @@ class IndexManager
     /**
      * Get field accessor method.
      *
-     * @param $entityName
-     * @param $field
-     *
      * @throws MethodNotFoundException
-     *
-     * @return string
      */
-    public function getFieldAccessorMethod($entityName, $field)
+    public function getFieldAccessorMethod(string $entityName, string $field):string
     {
         $prefixes = [
             'get',
@@ -182,20 +157,12 @@ class IndexManager
         throw new MethodNotFoundException('Accessor method of field ' . $field . ' of entity ' . $entityName . ' not found');
     }
 
-    /**
-     * @return array
-     */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
 
-    /**
-     * @param array $config
-     *
-     * @return self
-     */
-    public function setConfig($config)
+    public function setConfig(array $config): self
     {
         $this->config = $config;
 
