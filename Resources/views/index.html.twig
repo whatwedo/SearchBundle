@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pagination.total }} Search Results for "{{ searchTerm }}" {% endblock %}
+
+{% block main %}
+
+    <div class="whatwedo_table:wrapper bg-white" data-controller="whatwedo--table-bundle--filter">
+        <header class="whatwedo_table:header border-b border-neutral-200 px-4 py-4 sm:flex sm:items-center sm:justify-between">
+            <div class="whatwedo_table:header__title flex-1 min-w-0 text-lg font-medium leading-6 text-neutral-900 sm:truncate">
+                <h1>
+                    {{ pagination.total }} Search Results for "{{ searchTerm }}"
+                </h1>
+
+
+            </div>
+
+            {% if duration %}
+            ({{ duration }} ms)
+            {% endif %}
+
+        </header>
+
+
+
+
+        <div class="whatwedo_table:table__wrapper align-middle inline-block min-w-full border-b border-neutral-200">
+            <table class="min-w-full" data-whatwedo--table-bundle--table-target="table" style="padding: 0px;">
+                <thead class="tableFloatingHeaderOriginal">
+                <tr class="border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-500 text-left uppercase tracking-wider">
+                    <th class="px-6 py-3">
+                        Name
+                    </th>
+
+                </tr>
+                </thead><thead class="tableFloatingHeader" style="display: none; opacity: 0;">
+                <tr class="border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-500 text-left uppercase tracking-wider">
+                    <th class="px-6 py-3">
+                        Name
+                    </th>
+
+                </tr>
+                </thead>
+                <tbody class="whatwedo_table:table__body bg-white text-sm text-neutral-500 font-medium divide-y divide-neutral-100">
+
+                {% for item in results %}
+                    <tr class="whatwedo_table:table__row hover:bg-neutral-50 transition duration-500 color">
+                    <td class="px-6 py-2 whitespace-nowrap text-neutral-900">
+                        <a href="/app_company/7">
+                            id: {{ item.id }} --
+                            class: {{ item.class }} --
+                            entity: {{ item.entity }} --
+                            score: {{ item.score }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+
+        {% set pageOffset = 5 %}
+
+        {% set paginationLinks = [] %}
+
+        {# first/previous #}
+        {% if pagination.currentPage > 1 %}
+{#            {% set paginationLinks = paginationLinks|merge([{#}
+{#                is_current: false,#}
+{#                title: 'whatwedo_table.pagination.first_page'|trans,#}
+{#                link: whatwedo_table_path_replace_arguments({ (whatwedo_table_parameter(table, 'page')) : 1 }),#}
+{#                contents: bootstrap_icon('chevron-bar-left')#}
+{#            }]) %}#}
+{#            {% set paginationLinks = paginationLinks|merge([{#}
+{#                is_current: false,#}
+{#                title: 'whatwedo_table.pagination.previous_page'|trans,#}
+{#                link: whatwedo_table_path_replace_arguments({ (whatwedo_table_parameter(table, 'page')) : pagination.currentPage - 1 }),#}
+{#                contents: bootstrap_icon('chevron-left')#}
+{#            }]) %}#}
+        {% endif %}
+
+        {# offset before current #}
+        {% for i in pageOffset..1 %}
+            {% set page = pagination.currentPage - i %}
+            {% if page > 0 %}
+                {% set paginationLinks = paginationLinks|merge([{
+                    is_current: false,
+                    title: 'whatwedo_table.pagination.page_num'|trans({'{page}': page}),
+                    link: app.request.pathInfo ~ '?query=' ~ app.request.query.get('query') ~ '&page=' ~ page ~ '&limit=' ~ pagination.limit,
+                    contents: page
+                }]) %}
+            {% endif %}
+        {% endfor %}
+
+        {# current #}
+        {% set paginationLinks = paginationLinks|merge([{
+            is_current: true,
+            title: 'whatwedo_table.pagination.current_page'|trans,
+            link: app.request.pathInfo ~ '?query=' ~ app.request.query.get('query') ~ '&page=' ~ pagination.currentPage ~ '&limit=' ~ pagination.limit,
+            contents: pagination.currentPage
+        }]) %}
+
+        {# offset after current #}
+        {% for i in 1..pageOffset %}
+            {% set page = pagination.currentPage + i %}
+            {% if page < ( pagination.totalPages + 1 ) %}
+                {% set paginationLinks = paginationLinks|merge([{
+                    is_current: false,
+                    title: 'whatwedo_table.pagination.page_num'|trans({'{page}': page}),
+                    link: app.request.pathInfo ~ '?query=' ~ app.request.query.get('query') ~ '&page=' ~ page ~ '&limit=' ~ pagination.limit,
+                    contents: page
+                }]) %}
+            {% endif %}
+        {% endfor %}
+
+        {# next/first #}
+        {% if pagination.currentPage < pagination.totalPages %}
+            {% set paginationLinks = paginationLinks|merge([{
+                is_current: false,
+                title: 'whatwedo_table.pagination.next_page'|trans,
+                link: app.request.pathInfo ~ '?query=' ~ app.request.query.get('query') ~ '&page=' ~ (pagination.currentPage + 1) ~ '&limit=' ~ pagination.limit,
+                contents: bootstrap_icon('chevron-right')
+            }]) %}
+            {% set paginationLinks = paginationLinks|merge([{
+                is_current: false,
+                title: 'whatwedo_table.pagination.last_page'|trans,
+                link: app.request.pathInfo ~ '?query=' ~ app.request.query.get('query') ~ '&page=' ~ pagination.totalPages ~ '&limit=' ~ pagination.limit,
+                contents: bootstrap_icon('chevron-bar-right')
+            }]) %}
+        {% endif %}
+
+        <footer class="whatwedo_table:footer bg-white px-4 py-3 flex items-center justify-between border-t border-neutral-200 sm:px-6">
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-neutral-700 inline-block">
+                        {% set offsetResults = 0 %}
+                        {% if pagination.total %}{% set offsetResults = pagination.offsetStart %}{% endif %}
+
+                        {{ 'whatwedo_table.foot.result'|trans({
+                            '{offsetResults}': pagination.offsetStart,
+                            '{offsetLength}': pagination.offsetEnd,
+                            '{totalResults}': pagination.totalResults
+                        }) }}
+                    </p>
+
+                    <div
+                        {{ stimulus_controller('whatwedo/core-bundle/dropdown') }}
+                        class="whatwedo_table:footer__dropdown relative inline-block text-left pl-4"
+                    >
+                        <button
+                            class="whatwedo_table-button--pagination"
+                            {{ stimulus_action({'whatwedo/core-bundle/dropdown': ['toggle', {'click@window': 'hide'}]}) }}
+                            type="button"
+                        >
+                            {{ 'whatwedo_table.amount_entries'|trans({'{amount}': pagination.limit}) }}
+                            {{ bootstrap_icon('chevron-up', { class: 'inline w-5 h-5 pl-2' }) }}
+                        </button>
+
+                        <div
+                            {{ stimulus_target('whatwedo/core-bundle/dropdown', 'menu') }}
+                            class="hidden transition duration-300 transform origin-bottom-left absolute left-3 bottom-11 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                            data-transition-enter-from="opacity-0 scale-95"
+                            data-transition-enter-to="opacity-100 scale-100"
+                            data-transition-leave-from="opacity-100 scale-100"
+                            data-transition-leave-to="opacity-0 scale-95"
+                        >
+                            <div class="py-1 text-neutral-700 text-sm">
+                                {% for limit in pagination.limit_choices|filter(limit => limit != pagination.limit) %}
+                                    <a class="block px-4 py-2 hover:bg-neutral-50" href="{{ app.request.pathInfo }}?query={{ app.request.query.get('query') }}&limit={{ limit }}">
+                                        {{- 'whatwedo_table.amount_entries'|trans({'{amount}': limit}) -}}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <nav class="whatwedo_table:footer__pagination relative z-0 inline-flex rounded-md shadow-sm -space-x-px text-sm font-medium text-neutral-500 bg-white">
+                        {% for link in paginationLinks %}
+                            <a
+                                class="relative inline-flex items-center w-8 justify-center py-2 border border-neutral-300 transition-colors hover:bg-neutral-100 first:rounded-l-md last:rounded-r-md{% if link.is_current %} bg-neutral-200 font-medium{% endif %}"
+                                href="{{ link.link }}"
+                                title="{{ link.title }}"
+                            >
+                                {{ link.contents|raw }}
+                            </a>
+                        {% endfor %}
+                    </nav>
+                </div>
+            </div>
+        </footer>
+
+
+    </div>
+
+{% endblock %}
