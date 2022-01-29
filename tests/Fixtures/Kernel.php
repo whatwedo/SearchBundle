@@ -11,14 +11,12 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Translation\Translator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\CoreBundle\whatwedoCoreBundle;
 use whatwedo\SearchBundle\Manager\FilterManager;
 use whatwedo\SearchBundle\Manager\SearchManager;
-use whatwedo\SearchBundle\Tests\Fixtures\Repository\DepartmentRepository;
-use whatwedo\SearchBundle\Tests\Fixtures\Repository\EventRepository;
+use whatwedo\SearchBundle\Tests\Fixtures\Repository\CompanyRepository;
+use whatwedo\SearchBundle\Tests\Fixtures\Repository\ContactRepository;
 use whatwedo\SearchBundle\whatwedoSearchBundle;
 use Zenstruck\Foundry\ZenstruckFoundryBundle;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
@@ -47,9 +45,9 @@ class Kernel extends BaseKernel
     protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader): void
     {
         $registerClasses = [
-            DepartmentRepository::class,
-            EventRepository::class,
-            DepartmentRepository::class,
+            ContactRepository::class,
+            CompanyRepository::class,
+            ContactRepository::class,
             SearchManager::class,
             FilterManager::class,
             //     FormatterManager::class,
@@ -63,14 +61,15 @@ class Kernel extends BaseKernel
         }
 
         $containerBuilder->register(FormatterManager::class)
-            ->addArgument([tagged_iterator('whatwedo_core.formatter')]);
-
-        $containerBuilder->register(TranslatorInterface::class)
-            ->setClass(Translator::class);
+            ->addArgument(tagged_iterator('whatwedo_core.formatter'));
 
         $containerBuilder->loadFromExtension('framework', [
             'secret' => 'S3CRET',
             'test' => true,
+            'default_locale' => 'en',
+            'translator' => [
+                'default_path' => '%kernel.project_dir%/translations',
+            ],
         ]);
 
         $containerBuilder->loadFromExtension(

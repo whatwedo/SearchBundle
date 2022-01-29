@@ -4,21 +4,29 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use whatwedo\SearchBundle\Tests\Helper\ResetDatabase;
+use Doctrine\ORM\EntityManagerInterface;
+use whatwedo\SearchBundle\Entity\Index;
 use Zenstruck\Console\Test\InteractsWithConsole;
-use Zenstruck\Foundry\Test\Factories;
 
-class PopulateTest extends KernelTestCase
+class PopulateTest extends AbstractSearchTest
 {
-    use Factories;
-    use ResetDatabase;
     use InteractsWithConsole;
 
     public function testPopulateCommand()
     {
+        $this->_resetSchema();
+        $this->_resetDatabase();
+
+        $this->createEntities();
+
         $this->executeConsoleCommand('whatwedo:search:populate')
-            ->assertSuccessful() // command exit code is 0
+            ->assertSuccessful()
+            ->assertOutputContains('Flushing index table')
+            ->assertOutputContains('Entity\Company')
+            ->assertOutputContains('Entity\Contact')
         ;
+
+        $this->assertSame(1100, self::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Index::class)->count([]));
     }
 }
