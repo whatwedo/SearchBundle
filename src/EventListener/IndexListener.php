@@ -72,7 +72,6 @@ class IndexListener implements EventSubscriber
      */
     protected static $removeVisited = [];
 
-    
     public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
     {
         $this->indexManager = $indexManager;

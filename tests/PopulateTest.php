@@ -6,25 +6,22 @@ namespace whatwedo\SearchBundle\Tests;
 
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\SearchBundle\Entity\Index;
-use Zenstruck\Console\Test\InteractsWithConsole;
+use whatwedo\SearchBundle\Populator\PopulatorInterface;
+use whatwedo\SearchBundle\Populator\StandardPopulator;
 
 class PopulateTest extends AbstractSearchTest
 {
-    use InteractsWithConsole;
-
-    public function testPopulateCommand()
+    public function testPopulate()
     {
         $this->_resetSchema();
         $this->_resetDatabase();
 
         $this->createEntities();
 
-        $this->executeConsoleCommand('whatwedo:search:populate')
-            ->assertSuccessful()
-            ->assertOutputContains('Flushing index table')
-            ->assertOutputContains('Entity\Company')
-            ->assertOutputContains('Entity\Contact')
-        ;
+        /** @var PopulatorInterface $populator */
+        $populator = self::getContainer()->get(StandardPopulator::class);
+
+        $populator->populate();
 
         $this->assertSame(1100, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
