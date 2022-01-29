@@ -77,11 +77,11 @@ class MatchAgainst extends FunctionNode
             $haystack .= $column->dispatch($sqlWalker);
         }
 
-        $query = 'MATCH('.$haystack.
-            ') AGAINST ('.$this->needle->dispatch($sqlWalker);
+        $query = 'MATCH(' . $haystack .
+            ') AGAINST (' . $this->needle->dispatch($sqlWalker);
 
-        if ($this->mode && '' !== $this->mode->value) {
-            $query .= ' '.trim($this->mode->dispatch($sqlWalker), "'").' )';
+        if ($this->mode && $this->mode->value !== '') {
+            $query .= ' ' . trim($this->mode->dispatch($sqlWalker), "'") . ' )';
         } else {
             $query .= ')';
         }

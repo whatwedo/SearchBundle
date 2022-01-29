@@ -116,12 +116,11 @@ class IndexRepository extends ServiceEntityRepository
         return $ids;
     }
 
-
     /**
      * @param $query
-     * @param array $entities
-     * @param array $fields
+     *
      * @return array
+     *
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      */
@@ -129,43 +128,37 @@ class IndexRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('i');
         $qb->select('i.foreignId as id');
-        $qb->addSelect("MATCH_AGAINST(i.content, :query) AS _matchQuote");
-        $qb->addSelect("i.model");
-        $qb->where("MATCH_AGAINST(i.content, :query) > :minScore");
+        $qb->addSelect('MATCH_AGAINST(i.content, :query) AS _matchQuote');
+        $qb->addSelect('i.model');
+        $qb->where('MATCH_AGAINST(i.content, :query) > :minScore');
         $qb->orWhere('i.content LIKE :queryWildcard');
         $qb->groupBy('i.foreignId');
         $qb->addGroupBy('_matchQuote');
         $qb->addGroupBy('i.model');
         $qb->addOrderBy('_matchQuote', 'DESC');
         $qb->setParameter('query', $query);
-        $qb->setParameter('queryWildcard', '%'.$query.'%');
+        $qb->setParameter('queryWildcard', '%' . $query . '%');
         $qb->setParameter('minScore', round(strlen($query) * 0.8));
-
 
         $ors = $qb->expr()->orX();
 
         foreach ($entities as $key => $entity) {
             $ors->add($qb->expr()->eq('i.model', ':entity_' . $key));
             $qb->setParameter('entity_' . $key, $entity);
-
         }
         $qb->andWhere(
             $ors
         );
 
-
         foreach ($fields as $key => $field) {
             $qb->andWhere('i.field = :fieldName_' . $key)
                 ->setParameter('fieldName_' . $key, $field);
-        };
+        }
 
         $result = $qb->getQuery()->getResult();
 
         return $result;
     }
-
-
-    
 
     /**
      * @param $entity

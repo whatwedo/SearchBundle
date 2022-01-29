@@ -138,7 +138,7 @@ class IndexManager
      *
      * @throws MethodNotFoundException
      */
-    public function getFieldAccessorMethod(string $entityName, string $field):string
+    public function getFieldAccessorMethod(string $entityName, string $field): string
     {
         $prefixes = [
             'get',
@@ -191,6 +191,7 @@ class IndexManager
                 $fields[$method->getName()] = $annotation;
             }
         }
+
         return $fields;
     }
 
@@ -201,7 +202,7 @@ class IndexManager
         foreach ($reflection->getMethods() as $reflectionMethod) {
             $methodAttributes = $reflectionMethod->getAttributes();
             foreach ($methodAttributes as $attribute) {
-                if ($attribute->getName() == Index::class) {
+                if ($attribute->getName() === Index::class) {
                     $fields[$reflectionMethod->getName()] = $attribute->newInstance();
                 }
             }
@@ -209,11 +210,12 @@ class IndexManager
         foreach ($reflection->getProperties() as $reflectionProperty) {
             $propertyAttributes = $reflectionProperty->getAttributes();
             foreach ($propertyAttributes as $attribute) {
-                if ($attribute->getName() == Index::class) {
+                if ($attribute->getName() === Index::class) {
                     $fields[$reflectionProperty->getName()] = $attribute->newInstance();
                 }
             }
         }
+
         return $fields;
     }
 }

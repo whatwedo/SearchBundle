@@ -105,17 +105,17 @@ class PopulateCommand extends BaseCommand
         $this->log('Flushing index table');
         $this->indexManager->flush();
 
-        $targetEntity = $this->escape((string)$input->getArgument('entity'));
+        $targetEntity = $this->escape((string) $input->getArgument('entity'));
 
         $entityExists = $this->doctrine->getManager()->getMetadataFactory()->isTransient($targetEntity);
         if (! $entityExists) {
-            $this->log('Entity "'.$targetEntity.'" not a valid Doctrine entity!');
+            $this->log('Entity "' . $targetEntity . '" not a valid Doctrine entity!');
 
             return 1;
         }
 
         if ($targetEntity && ! \in_array(str_replace('\\\\', '\\', $targetEntity), $entities, true)) {
-            $this->log('Entity "'.$targetEntity.'" not a indexed entity!');
+            $this->log('Entity "' . $targetEntity . '" not a indexed entity!');
 
             return 1;
         }
@@ -158,7 +158,7 @@ class PopulateCommand extends BaseCommand
 
         /** @var Connection $connection */
         $connection = $this->doctrine->getConnection();
-        $this->log('Indexing of entity '.$entityName);
+        $this->log('Indexing of entity ' . $entityName);
 
         // Get required meta information
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
@@ -210,7 +210,7 @@ class PopulateCommand extends BaseCommand
 
                 // Update progress bar every 200 iterations
                 // as well as gc
-                if (0 === $i % 200) {
+                if ($i % 200 === 0) {
                     if (count($insertData)) {
                         $this->bulkInsert($insertSqlParts, $insertData, $connection);
                     }
@@ -246,7 +246,7 @@ class PopulateCommand extends BaseCommand
 
     protected function escape(string $value): string
     {
-        if (false === mb_strpos($value, '\\\\')) {
+        if (mb_strpos($value, '\\\\') === false) {
             $value = str_replace('\\', '\\\\', $value);
         }
 
@@ -255,7 +255,7 @@ class PopulateCommand extends BaseCommand
 
     private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
     {
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES '.implode(',', $insertSqlParts));
+        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
         $bulkInsertStatetment->execute($insertData);
     }
 }

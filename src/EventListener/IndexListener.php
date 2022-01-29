@@ -59,20 +59,20 @@ class IndexListener implements EventSubscriber
     protected $formatterManager;
 
     /**
-     * Prevent infinite recursion
+     * Prevent infinite recursion.
+     *
      * @var array
      */
     protected static $indexVisited = [];
 
     /**
-     * Prevent infinite recursion
+     * Prevent infinite recursion.
+     *
      * @var array
      */
     protected static $removeVisited = [];
 
-    /**
-     * IndexListener constructor.
-     */
+    
     public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
     {
         $this->indexManager = $indexManager;
@@ -129,7 +129,7 @@ class IndexListener implements EventSubscriber
             $idMethod = $this->indexManager->getIdMethod($entityName);
             foreach (array_keys($indexes) as $field) {
                 $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
-                if (null !== $entry) {
+                if ($entry !== null) {
                     $em->remove($entry);
                 }
             }
@@ -141,7 +141,7 @@ class IndexListener implements EventSubscriber
     public function index(LifecycleEventArgs $args)
     {
         $em = $args->getObjectManager();
-        if (null === $this->indexInsertStmt) {
+        if ($this->indexInsertStmt === null) {
             $indexPersister = $em->getUnitOfWork()->getEntityPersister(Index::class);
             $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
             $rmIndexInsertSQL->setAccessible(true);

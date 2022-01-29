@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace whatwedo\SearchBundle\Model;
 
 class ResultItem
@@ -9,8 +11,7 @@ class ResultItem
         private string $class,
         private string $score,
         private $entity
-    )
-    {
+    ) {
     }
 
     public function getId(): int
@@ -31,5 +32,5 @@ class ResultItem
     public function getEntity()
     {
         return $this->entity;
-    }    
+    }
 }

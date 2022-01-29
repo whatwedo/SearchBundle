@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace whatwedo\SearchBundle\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,15 +13,14 @@ class SearchManager
     public function __construct(
         private IndexRepository $indexRepository,
         private EntityManagerInterface $entityManager
-    )
-    {
+    ) {
     }
 
     /**
      * @return array|ResultItem[]
      */
-    public function search(string $searchTerm) {
-
+    public function search(string $searchTerm)
+    {
         $indexResults = $this->indexRepository->searchEntities($searchTerm);
         $groupedEntities = $this->loadEntities($indexResults);
         $entities = [];
@@ -37,28 +38,28 @@ class SearchManager
         return $entities;
     }
 
-    /**
-     * @param array $indexResults
-     * @return array
-     */
     protected function groupByClass(array $indexResults): array
     {
         $groupByClass = [];
         foreach ($indexResults as $searchResult) {
-            if (!isset($groupByClass[$searchResult['model']])) {
+            if (! isset($groupByClass[$searchResult['model']])) {
                 $groupByClass[$searchResult['model']] = [];
             }
 
             $groupByClass[$searchResult['model']][] = $searchResult['id'];
         }
+
         return $groupByClass;
     }
 
-    private function loadEntities(array $indexResults) {
+    private function loadEntities(array $indexResults)
+    {
         $groupedEntities = [];
 
         foreach ($this->groupByClass($indexResults) as $class => $ids) {
-            $result = $this->entityManager->getRepository($class)->findBy(['id' => $ids]);
+            $result = $this->entityManager->getRepository($class)->findBy([
+                'id' => $ids,
+            ]);
 
             $data = [];
             foreach ($result as $item) {

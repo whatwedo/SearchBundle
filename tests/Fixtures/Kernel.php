@@ -12,12 +12,10 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Translation\Translator;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\CoreBundle\whatwedoCoreBundle;
-use whatwedo\SearchBundle\Command\PopulateCommand;
+use whatwedo\SearchBundle\Manager\FilterManager;
 use whatwedo\SearchBundle\Manager\SearchManager;
 use whatwedo\SearchBundle\Tests\Fixtures\Repository\DepartmentRepository;
 use whatwedo\SearchBundle\Tests\Fixtures\Repository\EventRepository;
@@ -53,7 +51,8 @@ class Kernel extends BaseKernel
             EventRepository::class,
             DepartmentRepository::class,
             SearchManager::class,
-       //     FormatterManager::class,
+            FilterManager::class,
+            //     FormatterManager::class,
         ];
 
         foreach ($registerClasses as $registerClass) {
@@ -64,7 +63,7 @@ class Kernel extends BaseKernel
         }
 
         $containerBuilder->register(FormatterManager::class)
-            ->addArgument([tagged_iterator("whatwedo_core.formatter")]);
+            ->addArgument([tagged_iterator('whatwedo_core.formatter')]);
 
         $containerBuilder->register(TranslatorInterface::class)
             ->setClass(Translator::class);
