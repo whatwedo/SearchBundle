@@ -6,5 +6,5 @@ namespace whatwedo\SearchBundle\Populator;
 
 interface PopulatorInterface
 {
-    public function populate(?PopulateOutputInterface $output, ?string $entityClasses): void;
+    public function populate(?PopulateOutputInterface $output, ?string $entityClass): void;
 }

@@ -22,7 +22,7 @@ class Contact implements \Stringable
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=50, unique=true)
+     * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank
      * @Assert\NotNull()
      * @Index()

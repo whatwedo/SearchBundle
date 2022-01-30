@@ -127,7 +127,7 @@ class IndexListener implements EventSubscriber
             $indexes = $this->indexManager->getIndexesOfEntity($class);
             $idMethod = $this->indexManager->getIdMethod($entityName);
             foreach (array_keys($indexes) as $field) {
-                $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
+                $entry = $em->getRepository(Index::class)->findExisting($class, $field, $entity->{$idMethod}());
                 if ($entry !== null) {
                     $em->remove($entry);
                 }
@@ -193,11 +193,11 @@ class IndexListener implements EventSubscriber
                         $this->indexInsertStmt->bindValue(2, $class);
                         $this->indexInsertStmt->bindValue(3, $field);
                         $this->indexInsertStmt->bindValue(4, $content);
-                        $this->indexInsertStmt->execute();
+                        $this->indexInsertStmt->executeStatement();
                     } else {
                         $this->indexUpdateStmt->bindValue(1, $content);
                         $this->indexUpdateStmt->bindValue(2, $entry->getId());
-                        $this->indexUpdateStmt->execute();
+                        $this->indexUpdateStmt->executeStatement();
                     }
                 }
             }

@@ -7,6 +7,8 @@ namespace whatwedo\SearchBundle\Populator;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
+use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
+use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
@@ -23,7 +25,7 @@ class StandardPopulator implements PopulatorInterface
         $this->output = new NullPopulateOutput();
     }
 
-    public function populate(?PopulateOutputInterface $output = null, ?string $entityClasses = null): void
+    public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
     {
         if ($output) {
             $this->output = $output;
@@ -38,31 +40,25 @@ class StandardPopulator implements PopulatorInterface
         $this->output->log('Flushing index table');
         $this->indexManager->flush();
 
-        $entityExists = $this->entityManager->getMetadataFactory()->isTransient($entityClasses);
-        if (! $entityExists) {
-            $this->output->log('Entity "' . $entityClasses . '" not a valid Doctrine entity!');
 
-            return;
+        if ($entityClass) {
+            $entityExists = $this->entityManager->getMetadataFactory()->isTransient($entityClass);
+            if ($entityExists) {
+                throw new ClassNotDoctrineMappedException($entityClass);
+            }
+
+            if ($entityClass && ! \in_array($entityClass, $entities, true)) {
+                throw new ClassNotIndexedEntityException($entityClass);
+            }
+
         }
 
-        if ($entityClasses && ! \in_array(str_replace('\\\\', '\\', $entityClasses), $entities, true)) {
-            $this->output->log('Entity "' . $entityClasses . '" not a indexed entity!');
-
-            return;
-        }
-
-        // Indexing entities
-        $runned = false;
+        $this->output->log(sprintf('Index %s entites', count($entities)));
         foreach ($entities as $entityName) {
-            if ($entityClasses && $entityName !== str_replace('\\\\', '\\', $entityClasses)) {
+            if ($entityClass && $entityName !== str_replace('\\\\', '\\', $entityClass)) {
                 continue;
             }
             $this->indexEntity($entityName);
-            $runned = true;
-        }
-
-        if (! $runned) {
-            $this->output->log('Indexer not runned!');
         }
     }
 
@@ -146,7 +142,6 @@ class StandardPopulator implements PopulatorInterface
                     $insertData = [];
 
                     $this->output->setProgress($i);
-//                    $progress->setProgress($i);
                     $this->gc();
                 }
                 ++$i;
@@ -159,10 +154,7 @@ class StandardPopulator implements PopulatorInterface
 
         $this->gc();
 
-        // Tear down progress bar
         $this->output->progressFinish();
-//        $progress->finish();
-        $this->output->log(PHP_EOL);
     }
 
     /**
@@ -172,15 +164,6 @@ class StandardPopulator implements PopulatorInterface
     {
         $this->entityManager->clear();
         gc_collect_cycles();
-    }
-
-    protected function escape(string $value): string
-    {
-        if (mb_strpos($value, '\\\\') === false) {
-            $value = str_replace('\\', '\\\\', $value);
-        }
-
-        return $value;
     }
 
     private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
