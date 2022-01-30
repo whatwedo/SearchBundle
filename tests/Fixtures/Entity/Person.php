@@ -27,7 +27,6 @@ class Person
      */
     private ?string $name = null;
 
-
     public function getId(): ?int
     {
         return $this->id;
@@ -44,5 +43,4 @@ class Person
 
         return $this;
     }
-
 }

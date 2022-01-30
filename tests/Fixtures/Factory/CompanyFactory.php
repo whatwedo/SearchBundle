@@ -32,6 +32,9 @@ final class CompanyFactory extends ModelFactory
     {
         return [
             'name' => self::faker()->company(),
+            'city' => self::faker()->city(),
+            'country' => self::faker()->country(),
+            'taxIdentificationNumber' => self::faker()->numerify(self::faker()->countryCode() . '###.####.###.#.###.##'),
         ];
     }
 

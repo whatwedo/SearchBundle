@@ -40,7 +40,6 @@ class StandardPopulator implements PopulatorInterface
         $this->output->log('Flushing index table');
         $this->indexManager->flush();
 
-
         if ($entityClass) {
             $entityExists = $this->entityManager->getMetadataFactory()->isTransient($entityClass);
             if ($entityExists) {
@@ -50,7 +49,6 @@ class StandardPopulator implements PopulatorInterface
             if ($entityClass && ! \in_array($entityClass, $entities, true)) {
                 throw new ClassNotIndexedEntityException($entityClass);
             }
-
         }
 
         $this->output->log(sprintf('Index %s entites', count($entities)));

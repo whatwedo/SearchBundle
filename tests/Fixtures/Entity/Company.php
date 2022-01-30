@@ -32,6 +32,30 @@ class Company
     private ?string $name = null;
 
     /**
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank
+     * @Assert\NotNull()
+     * @Index()
+     */
+    private ?string $city = null;
+
+    /**
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank
+     * @Assert\NotNull()
+     * @Index()
+     */
+    private ?string $country = null;
+
+    /**
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank
+     * @Assert\NotNull()
+     * @Index()
+     */
+    private ?string $taxIdentificationNumber = null;
+
+    /**
      * @var Collection|array<Contact> One Member has Many Departments
      * @ORM\OneToMany (targetEntity="Contact", mappedBy="company")
      */
@@ -57,6 +81,36 @@ class Company
         $this->name = $name;
 
         return $this;
+    }
+
+    public function getTaxIdentificationNumber(): ?string
+    {
+        return $this->taxIdentificationNumber;
+    }
+
+    public function setTaxIdentificationNumber(?string $taxIdentificationNumber): void
+    {
+        $this->taxIdentificationNumber = $taxIdentificationNumber;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): void
+    {
+        $this->city = $city;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): void
+    {
+        $this->country = $country;
     }
 
     public function getContacts(): Collection

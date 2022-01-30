@@ -32,7 +32,7 @@ final class ContactFactory extends ModelFactory
     {
         return [
             'name' => self::faker()->name(),
-            'company' => CompanyFactory::random(),
+            'company' => CompanyFactory::randomOrCreate(),
         ];
     }
 

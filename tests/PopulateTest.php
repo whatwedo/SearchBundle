@@ -28,7 +28,7 @@ class PopulateTest extends AbstractSearchTest
 
         $populator->populate();
 
-        $this->assertSame(1100, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(1400, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 
@@ -44,10 +44,9 @@ class PopulateTest extends AbstractSearchTest
 
         $populator->populate(null, Company::class);
 
-        $this->assertSame(100, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(400, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
-
 
     public function testPopulateNotEntity()
     {
@@ -57,7 +56,6 @@ class PopulateTest extends AbstractSearchTest
         $this->expectException(ClassNotDoctrineMappedException::class);
 
         $populator->populate(null, NotADoctrinieModel::class);
-
     }
 
     public function testPopulateNotIndexEntity()
@@ -68,7 +66,5 @@ class PopulateTest extends AbstractSearchTest
         $this->expectException(ClassNotIndexedEntityException::class);
 
         $populator->populate(null, Person::class);
-
     }
-
 }
