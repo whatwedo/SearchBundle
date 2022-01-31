@@ -58,7 +58,7 @@ class Contact implements \Stringable
 
     public function getCompany(): Company
     {
-        return $this->getCompany();
+        return $this->company;
     }
 
     public function setCompany(Company $company): void

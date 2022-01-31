@@ -30,7 +30,9 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Statement;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
@@ -72,10 +74,16 @@ class IndexListener implements EventSubscriber
      */
     protected static $removeVisited = [];
 
-    public function __construct(IndexManager $indexManager, FormatterManager $formatterManager)
-    {
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(
+        IndexManager $indexManager,
+        FormatterManager $formatterManager,
+        EntityManagerInterface $entityManager
+    ) {
         $this->indexManager = $indexManager;
         $this->formatterManager = $formatterManager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -104,7 +112,6 @@ class IndexListener implements EventSubscriber
 
     public function preRemove(LifecycleEventArgs $args)
     {
-        $em = $args->getObjectManager();
         $entity = $args->getObject();
         if ($entity instanceof Index) {
             return;
@@ -120,33 +127,32 @@ class IndexListener implements EventSubscriber
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $em->getMetadataFactory()->hasMetadataFor($class)
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
                 || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
             $indexes = $this->indexManager->getIndexesOfEntity($class);
             $idMethod = $this->indexManager->getIdMethod($entityName);
             foreach (array_keys($indexes) as $field) {
-                $entry = $em->getRepository(Index::class)->findExisting($class, $field, $entity->{$idMethod}());
+                $entry = $this->entityManager->getRepository(Index::class)->findExisting($class, $field, $entity->{$idMethod}());
                 if ($entry !== null) {
-                    $em->remove($entry);
+                    $this->entityManager->remove($entry);
                 }
             }
         }
 
-        $em->flush();
+        $this->entityManager->flush();
     }
 
     public function index(LifecycleEventArgs $args)
     {
-        $em = $args->getObjectManager();
         if ($this->indexInsertStmt === null) {
-            $indexPersister = $em->getUnitOfWork()->getEntityPersister(Index::class);
+            $indexPersister = $this->entityManager->getUnitOfWork()->getEntityPersister(Index::class);
             $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
             $rmIndexInsertSQL->setAccessible(true);
-            $this->indexInsertStmt = $em->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
-            $this->indexUpdateStmt = $em->getConnection()->prepare(
-                $em->createQueryBuilder()
+            $this->indexInsertStmt = $this->entityManager->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
+            $this->indexUpdateStmt = $this->entityManager->getConnection()->prepare(
+                $this->entityManager->createQueryBuilder()
                     ->update(Index::class, 'i')
                     ->set('i.content', '?1')
                     ->where('i.id = ?2')
@@ -163,14 +169,14 @@ class IndexListener implements EventSubscriber
             return;
         }
         static::$indexVisited[$oid] = true;
-        $entityName = \get_class($entity);
+        $entityName = ClassUtils::getClass($entity);
         if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $em->getMetadataFactory()->hasMetadataFor($class)
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
                 || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
@@ -187,7 +193,7 @@ class IndexListener implements EventSubscriber
                 }
                 $content = $formatter->getString($entity->{$fieldMethod}());
                 if (! empty($content)) {
-                    $entry = $em->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
+                    $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
                     if (! $entry) {
                         $this->indexInsertStmt->bindValue(1, $entity->{$idMethod}());
                         $this->indexInsertStmt->bindValue(2, $class);
