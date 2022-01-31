@@ -39,10 +39,19 @@ use whatwedo\CoreBundle\Formatter\DefaultFormatter;
 #[\Attribute]
 class Index
 {
+
+    public function __construct($formatter = null)
+    {
+        if ($formatter === null) {
+            $formatter = DefaultFormatter::class;
+        }
+        $this->formatter = $formatter;
+    }
+
     /**
      * @var string
      */
-    public $formatter = DefaultFormatter::class;
+    public $formatter;
 
     /**
      * @var array
