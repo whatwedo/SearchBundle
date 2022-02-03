@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace whatwedo\SearchBundle\Tests\Fixtures\Repository;
+namespace whatwedo\SearchBundle\Tests\App\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Company;
+use whatwedo\SearchBundle\Tests\App\Entity\Company;
 
 /**
  * @method Company|null find($id, $lockMode = null, $lockVersion = null)

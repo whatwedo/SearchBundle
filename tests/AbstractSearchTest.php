@@ -6,12 +6,12 @@ namespace whatwedo\SearchBundle\Tests;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Company;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Contact;
-use whatwedo\SearchBundle\Tests\Fixtures\Factory\CompanyFactory;
-use whatwedo\SearchBundle\Tests\Fixtures\Factory\ContactFactory;
-use whatwedo\SearchBundle\Tests\Helper\ResetDatabase;
+use whatwedo\SearchBundle\Tests\App\Entity\Company;
+use whatwedo\SearchBundle\Tests\App\Entity\Contact;
+use whatwedo\SearchBundle\Tests\App\Factory\CompanyFactory;
+use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 abstract class AbstractSearchTest extends KernelTestCase
 {
@@ -23,7 +23,6 @@ abstract class AbstractSearchTest extends KernelTestCase
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
-        $this->_resetDatabase();
         $entities = CompanyFactory::new()->withoutPersisting()->createMany(100);
         foreach ($entities as $entity) {
             $em->persist($entity->object());

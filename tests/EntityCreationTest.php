@@ -6,12 +6,12 @@ namespace whatwedo\SearchBundle\Tests;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Company;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Contact;
-use whatwedo\SearchBundle\Tests\Fixtures\Factory\CompanyFactory;
-use whatwedo\SearchBundle\Tests\Fixtures\Factory\ContactFactory;
-use whatwedo\SearchBundle\Tests\Helper\ResetDatabase;
+use whatwedo\SearchBundle\Tests\App\Entity\Company;
+use whatwedo\SearchBundle\Tests\App\Entity\Contact;
+use whatwedo\SearchBundle\Tests\App\Factory\CompanyFactory;
+use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class EntityCreationTest extends KernelTestCase
 {
@@ -20,7 +20,6 @@ class EntityCreationTest extends KernelTestCase
 
     public function testCreateCompanies()
     {
-        $this->_resetDatabase();
         $entities = CompanyFactory::new()->withoutPersisting()->createMany(100);
 
         /** @var EntityManagerInterface $em */
@@ -34,11 +33,9 @@ class EntityCreationTest extends KernelTestCase
 
     public function testCreateContacts()
     {
-        $this->_resetDatabase();
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
-        $this->_resetDatabase();
         $entities = CompanyFactory::new()->withoutPersisting()->createMany(100);
         foreach ($entities as $entity) {
             $em->persist($entity->object());

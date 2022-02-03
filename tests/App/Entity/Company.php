@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace whatwedo\SearchBundle\Tests\Fixtures\Entity;
+namespace whatwedo\SearchBundle\Tests\App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,7 +12,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 /**
  * @ORM\Table(name="company")
- * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Tests\Fixtures\Repository\CompanyRepository")
+ * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Tests\App\Repository\CompanyRepository")
  */
 class Company
 {

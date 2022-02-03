@@ -10,17 +10,14 @@ use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Populator\PopulatorInterface;
 use whatwedo\SearchBundle\Populator\StandardPopulator;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Company;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Person;
-use whatwedo\SearchBundle\Tests\Fixtures\Model\NotADoctrinieModel;
+use whatwedo\SearchBundle\Tests\App\Entity\Company;
+use whatwedo\SearchBundle\Tests\App\Entity\Person;
+use whatwedo\SearchBundle\Tests\App\Model\NotADoctrinieModel;
 
 class PopulateTest extends AbstractSearchTest
 {
     public function testPopulate()
     {
-        $this->_resetSchema();
-        $this->_resetDatabase();
-
         $this->createEntities();
 
         /** @var PopulatorInterface $populator */
@@ -34,9 +31,6 @@ class PopulateTest extends AbstractSearchTest
 
     public function testPopulateCompanies()
     {
-        $this->_resetSchema();
-        $this->_resetDatabase();
-
         $this->createEntities();
 
         /** @var PopulatorInterface $populator */

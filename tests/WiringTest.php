@@ -8,13 +8,11 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use whatwedo\SearchBundle\Manager\FilterManager;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Manager\SearchManager;
-use whatwedo\SearchBundle\Tests\Helper\ResetDatabase;
+use whatwedo\SearchBundle\Tests\App\Helper\ResetDatabase;
 use Zenstruck\Foundry\Test\Factories;
 
 class WiringTest extends KernelTestCase
 {
-    use Factories;
-    use ResetDatabase;
 
     public function testServiceWiring()
     {

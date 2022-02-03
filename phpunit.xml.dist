@@ -7,7 +7,7 @@
          failOnWarning="true"
 >
     <php>
-        <server name="KERNEL_CLASS" value="whatwedo\SearchBundle\Tests\Fixtures\Kernel"/>
+        <server name="KERNEL_CLASS" value="whatwedo\SearchBundle\Tests\App\Kernel"/>
         <server name="SHELL_VERBOSITY" value="-1"/>
         <server name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0&amp;max[direct]=0"/>
         <env name="DATABASE_URL" value="mysql://root:root@mariadb:3306/search_bundle" />

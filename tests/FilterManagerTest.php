@@ -7,9 +7,9 @@ namespace whatwedo\SearchBundle\Tests;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use whatwedo\SearchBundle\Filter\LowerCaseFilter;
 use whatwedo\SearchBundle\Manager\FilterManager;
-use whatwedo\SearchBundle\Tests\Helper\ResetDatabase;
 use whatwedo\SearchBundle\Tokenizer\StandardTokenizer;
 use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class FilterManagerTest extends KernelTestCase
 {

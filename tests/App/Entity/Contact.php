@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace whatwedo\SearchBundle\Tests\Fixtures\Entity;
+namespace whatwedo\SearchBundle\Tests\App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,7 +10,7 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 /**
  * @ORM\Table(name="contact")
- * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Tests\Fixtures\Repository\ContactRepository")
+ * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Tests\App\Repository\ContactRepository")
  */
 class Contact implements \Stringable
 {

@@ -6,17 +6,14 @@ namespace whatwedo\SearchBundle\Tests;
 
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\SearchBundle\Entity\Index;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Company;
-use whatwedo\SearchBundle\Tests\Fixtures\Entity\Contact;
-use whatwedo\SearchBundle\Tests\Fixtures\Factory\ContactFactory;
+use whatwedo\SearchBundle\Tests\App\Entity\Company;
+use whatwedo\SearchBundle\Tests\App\Entity\Contact;
+use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 
 class IndexListenerTest extends AbstractSearchTest
 {
     public function testEntityCreation()
     {
-        $this->_resetSchema();
-        $this->_resetDatabase();
-
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
         $this->assertSame(0, $em->getRepository(Index::class)->count([]));
@@ -53,9 +50,6 @@ class IndexListenerTest extends AbstractSearchTest
 
     public function testEntityUpdate()
     {
-        $this->_resetSchema();
-        $this->_resetDatabase();
-
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
