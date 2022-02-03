@@ -14,7 +14,7 @@ Features include:
 
 ## Documentation
 
-The source of the documentation is stored in the `Resources/doc` folder. [Jump to the master documentation](Resources/doc/index.md)
+The source of the documentation is stored in the `src/Resources/doc` folder. [Jump to the master documentation](src/Resources/doc/index.md)
 
 
 ## License

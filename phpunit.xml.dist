@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         colors="true"
+         bootstrap="tests/bootstrap.php"
+         failOnRisky="true"
+         failOnWarning="true"
+>
+    <php>
+        <server name="KERNEL_CLASS" value="whatwedo\SearchBundle\Tests\App\Kernel"/>
+        <server name="SHELL_VERBOSITY" value="-1"/>
+        <server name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0&amp;max[direct]=0"/>
+        <env name="DATABASE_URL" value="mysql://root:root@mariadb:3306/search_bundle" />
+
+    </php>
+    <testsuites>
+        <testsuite name="Search Test Bundle">
+            <directory>./tests/</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>

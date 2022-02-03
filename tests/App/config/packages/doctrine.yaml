@@ -1,0 +1,30 @@
+doctrine:
+  dbal:
+    default_connection: default
+    connections:
+      default:
+        # configure these for your database server
+        driver: 'pdo_sqlite'
+        charset: utf8mb4
+        default_table_options:
+          charset: utf8mb4
+          collate: utf8mb4_unicode_ci
+        url: '%env(resolve:DATABASE_URL)%'
+  orm:
+    default_entity_manager: default
+    auto_generate_proxy_classes: true
+    entity_managers:
+      default:
+        connection: default
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+          App:
+            is_bundle: false
+            type: annotation
+            dir: '%kernel.project_dir%/Entity'
+            prefix: 'whatwedo\SearchBundle\Tests\App\Entity'
+            alias: App
+        dql:
+            string_functions:
+                MATCH_AGAINST: whatwedo\SearchBundle\Extension\Doctrine\Query\Mysql\MatchAgainst

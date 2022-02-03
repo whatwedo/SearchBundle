@@ -1,0 +1,22 @@
+name: searchBundle
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    phpunit:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: shivammathur/setup-php@2cb9b829437ee246e9b3cac53555a39208ca6d28
+              with:
+                  php-version: '8.1'
+            - uses: actions/checkout@v2
+            - name: Install Dependencies
+              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+            - name: Execute tests (Unit and Feature tests) via PHPUnit
+              env:
+                  DATABASE_URL: sqlite:///%kernel.project_dir%/var/app.db
+              run: vendor/bin/simple-phpunit
