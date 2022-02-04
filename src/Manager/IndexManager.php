@@ -55,14 +55,8 @@ class IndexManager
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
         $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
-        if ($connection->getDatabasePlatform()->getName() === 'mysql') {
-            $connection->query('SET FOREIGN_KEY_CHECKS=0');
-        }
         $query = $dbPlatform->getTruncateTableSql($tableName);
-        $connection->executeUpdate($query);
-        if ($connection->getDatabasePlatform()->getName() === 'mysql') {
-            $connection->query('SET FOREIGN_KEY_CHECKS=1');
-        }
+        $connection->executeStatement($query);
     }
 
     /**
