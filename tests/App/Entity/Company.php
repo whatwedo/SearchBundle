@@ -27,8 +27,8 @@ class Company
      * @ORM\Column(type="string")
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index()
      */
+    #[Index]
     private ?string $name = null;
 
     /**
