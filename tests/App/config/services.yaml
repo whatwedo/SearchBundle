@@ -12,6 +12,9 @@ services:
     whatwedo\SearchBundle\Tests\App\Factory\:
         resource: '../Factory/*'
 
+    whatwedo\SearchBundle\Tests\App\Formatter\:
+        resource: '../Formatter/*'
+
     whatwedo\SearchBundle\Manager\SearchManager:
         public: true
 

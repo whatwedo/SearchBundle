@@ -30,13 +30,12 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use whatwedo\CoreBundle\Manager\FormatterManager;
-use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
+use whatwedo\SearchBundle\Populator\StandardPopulator;
 
 class IndexListener implements EventSubscriber
 {
@@ -76,14 +75,18 @@ class IndexListener implements EventSubscriber
 
     private EntityManagerInterface $entityManager;
 
+    private StandardPopulator $populator;
+
     public function __construct(
         IndexManager $indexManager,
         FormatterManager $formatterManager,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        StandardPopulator $populator
     ) {
         $this->indexManager = $indexManager;
         $this->formatterManager = $formatterManager;
         $this->entityManager = $entityManager;
+        $this->populator = $populator;
     }
 
     /**
@@ -102,126 +105,16 @@ class IndexListener implements EventSubscriber
 
     public function postPersist(LifecycleEventArgs $args)
     {
-        $this->index($args);
+        $this->populator->index($args->getObject());
     }
 
     public function postUpdate(LifecycleEventArgs $args)
     {
-        $this->index($args);
+        $this->populator->index($args->getObject());
     }
 
     public function preRemove(LifecycleEventArgs $args)
     {
-        $entity = $args->getObject();
-        if ($entity instanceof Index) {
-            return;
-        }
-        $oid = spl_object_hash($entity);
-        if (isset(static::$removeVisited[$oid])) {
-            return;
-        }
-        static::$removeVisited[$oid] = true;
-        $entityName = \get_class($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
-            return;
-        }
-        $classes = $this->getClassTree($entityName);
-        foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
-                continue;
-            }
-            $indexes = $this->indexManager->getIndexesOfEntity($class);
-            $idMethod = $this->indexManager->getIdMethod($entityName);
-            foreach (array_keys($indexes) as $field) {
-                $entry = $this->entityManager->getRepository(Index::class)->findExisting($class, $field, $entity->{$idMethod}());
-                if ($entry !== null) {
-                    $this->entityManager->remove($entry);
-                }
-            }
-        }
-
-        $this->entityManager->flush();
-    }
-
-    public function index(LifecycleEventArgs $args)
-    {
-        if ($this->indexInsertStmt === null) {
-            $indexPersister = $this->entityManager->getUnitOfWork()->getEntityPersister(Index::class);
-            $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
-            $rmIndexInsertSQL->setAccessible(true);
-            $this->indexInsertStmt = $this->entityManager->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
-            $this->indexUpdateStmt = $this->entityManager->getConnection()->prepare(
-                $this->entityManager->createQueryBuilder()
-                    ->update(Index::class, 'i')
-                    ->set('i.content', '?1')
-                    ->where('i.id = ?2')
-                    ->getQuery()
-                    ->getSql()
-            );
-        }
-        $entity = $args->getObject();
-        if ($entity instanceof Index) {
-            return;
-        }
-        $oid = spl_object_hash($entity);
-        if (isset(static::$indexVisited[$oid])) {
-            return;
-        }
-        static::$indexVisited[$oid] = true;
-        $entityName = ClassUtils::getClass($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
-            return;
-        }
-
-        $classes = $this->getClassTree($entityName);
-        foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
-                continue;
-            }
-
-            $indexes = $this->indexManager->getIndexesOfEntity($class);
-            $idMethod = $this->indexManager->getIdMethod($class);
-
-            /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-            foreach ($indexes as $field => $index) {
-                $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
-                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
-                if (method_exists($formatter, 'processOptions')) {
-                    $formatter->processOptions($index->getFormatterOptions());
-                }
-                $content = $formatter->getString($entity->{$fieldMethod}());
-                if (! empty($content)) {
-                    $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
-                    if (! $entry) {
-                        $this->indexInsertStmt->bindValue(1, $entity->{$idMethod}());
-                        $this->indexInsertStmt->bindValue(2, $class);
-                        $this->indexInsertStmt->bindValue(3, $field);
-                        $this->indexInsertStmt->bindValue(4, $content);
-                        $this->indexInsertStmt->executeStatement();
-                    } else {
-                        $this->indexUpdateStmt->bindValue(1, $content);
-                        $this->indexUpdateStmt->bindValue(2, $entry->getId());
-                        $this->indexUpdateStmt->executeStatement();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Get class tree.
-     *
-     * @param $className
-     *
-     * @return array
-     */
-    protected function getClassTree($className)
-    {
-        $classes = class_parents($className);
-        array_unshift($classes, $className);
-
-        return $classes;
+        $this->populator->remove($args->getObject());
     }
 }

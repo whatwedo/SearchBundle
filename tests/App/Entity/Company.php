@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use whatwedo\SearchBundle\Annotation\Index;
-use whatwedo\SearchBundle\Tests\App\Formatter\DummyFormatter;
 
 /**
  * @ORM\Table(name="company")
