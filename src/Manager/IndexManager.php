@@ -29,7 +29,7 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Manager;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
@@ -42,9 +42,14 @@ class IndexManager
 
     protected array $config = [];
 
-    public function __construct(ManagerRegistry $doctrine)
-    {
+    private Reader $annotationReader;
+
+    public function __construct(
+        ManagerRegistry $doctrine,
+        Reader $annotationReader
+    ) {
         $this->doctrine = $doctrine;
+        $this->annotationReader = $annotationReader;
     }
 
     /**
@@ -172,15 +177,14 @@ class IndexManager
     {
         $fields = [];
         $reflection = new \ReflectionClass($entity);
-        $annotationReader = new AnnotationReader();
         foreach ($reflection->getProperties() as $property) {
-            $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
+            $annotation = $this->annotationReader->getPropertyAnnotation($property, Index::class);
             if ($annotation !== null) {
                 $fields[$property->getName()] = $annotation;
             }
         }
         foreach ($reflection->getMethods() as $method) {
-            $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
+            $annotation = $this->annotationReader->getMethodAnnotation($method, Index::class);
             if ($annotation !== null) {
                 $fields[$method->getName()] = $annotation;
             }
