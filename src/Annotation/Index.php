@@ -39,39 +39,16 @@ use whatwedo\CoreBundle\Formatter\DefaultFormatter;
 #[\Attribute]
 class Index
 {
+    public string $formatter = DefaultFormatter::class;
 
-    public function __construct($formatter = null)
-    {
-        if ($formatter === null) {
-            $formatter = DefaultFormatter::class;
-        }
-        $this->formatter = $formatter;
-    }
+    public array $formatterOptions = [];
 
-    /**
-     * @var string
-     */
-    public $formatter;
-
-    /**
-     * @var array
-     */
-    public $formatterOptions = [];
-
-    /**
-     * @return string
-     */
-    public function getFormatter()
+    public function getFormatter(): string
     {
         return $this->formatter;
     }
 
-    /**
-     * @param string $formatter
-     *
-     * @return self
-     */
-    public function setFormatter($formatter)
+    public function setFormatter(string $formatter): self
     {
         $this->formatter = $formatter;
 
@@ -83,8 +60,10 @@ class Index
         return $this->formatterOptions;
     }
 
-    public function setFormatterOptions(array $formatterOptions): void
+    public function setFormatterOptions(array $formatterOptions): self
     {
         $this->formatterOptions = $formatterOptions;
+
+        return $this;
     }
 }

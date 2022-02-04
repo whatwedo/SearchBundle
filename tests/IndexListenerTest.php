@@ -33,7 +33,7 @@ class IndexListenerTest extends AbstractSearchTest
                         $value = $contact->getCompany()->getName();
                         break;
                     case 'city':
-                        $value = $contact->getCompany()->getCity();
+                        $value = 'dummy';
                         break;
                     case 'country':
                         $value = $contact->getCompany()->getCountry();
@@ -81,7 +81,7 @@ class IndexListenerTest extends AbstractSearchTest
                         $value = $contact->getCompany()->getName();
                         break;
                     case 'city':
-                        $value = $contact->getCompany()->getCity();
+                        $value = 'dummy';
                         break;
                     case 'country':
                         $value = $contact->getCompany()->getCountry();
