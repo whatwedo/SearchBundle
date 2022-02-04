@@ -95,4 +95,40 @@ class IndexListenerTest extends AbstractSearchTest
             }
         }
     }
+
+    public function testEntityDelete()
+    {
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        /** @var Contact $contact */
+        $contact = ContactFactory::createOne()->object();
+
+        $contactId = $contact->getId();
+
+        $em->clear();
+
+        $contact = $em->getRepository(Contact::class)->find($contactId);
+
+        $contact->getCompany()->setName('company');
+        $contact->getCompany()->setCity('city');
+        $contact->getCompany()->setCountry('county');
+        $contact->getCompany()->setTaxIdentificationNumber('123456');
+
+        $em->flush();
+        $em->clear();
+
+        $indexResults = $em->getRepository(Index::class)->findAll();
+
+        $this->assertCount(5, $indexResults);
+
+        $contact = $em->getRepository(Contact::class)->find($contactId);
+        $em->remove($contact);
+        $em->remove($contact->getCompany());
+        $em->flush();
+
+        $indexResults = $em->getRepository(Index::class)->findAll();
+
+        $this->assertCount(0, $indexResults);
+    }
 }

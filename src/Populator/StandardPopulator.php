@@ -6,7 +6,6 @@ namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
@@ -17,10 +16,6 @@ use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class StandardPopulator implements PopulatorInterface
 {
-    protected ?Statement $indexInsertStmt = null;
-
-    protected ?Statement $indexUpdateStmt = null;
-
     protected static array $indexVisited = [];
 
     protected static array $removeVisited = [];
@@ -71,22 +66,30 @@ class StandardPopulator implements PopulatorInterface
         }
     }
 
+    public function remove(object $entity): void
+    {
+        $oid = spl_object_hash($entity);
+        if (isset(static::$removeVisited[$oid])) {
+            return;
+        }
+        static::$removeVisited[$oid] = true;
+        $entityName = ClassUtils::getClass($entity);
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
+            return;
+        }
+        $classes = $this->getClassTree($entityName);
+        foreach ($classes as $class) {
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
+                continue;
+            }
+            $idMethod = $this->indexManager->getIdMethod($entityName);
+            $this->delete((string) $entity->{$idMethod}(), $class);
+        }
+    }
+
     public function index(object $entity)
     {
-        if ($this->indexInsertStmt === null) {
-            $indexPersister = $this->entityManager->getUnitOfWork()->getEntityPersister(Index::class);
-            $rmIndexInsertSQL = new \ReflectionMethod($indexPersister, 'getInsertSQL');
-            $rmIndexInsertSQL->setAccessible(true);
-            $this->indexInsertStmt = $this->entityManager->getConnection()->prepare($rmIndexInsertSQL->invoke($indexPersister));
-            $this->indexUpdateStmt = $this->entityManager->getConnection()->prepare(
-                $this->entityManager->createQueryBuilder()
-                    ->update(Index::class, 'i')
-                    ->set('i.content', '?1')
-                    ->where('i.id = ?2')
-                    ->getQuery()
-                    ->getSql()
-            );
-        }
         if ($entity instanceof Index) {
             return;
         }
@@ -121,52 +124,21 @@ class StandardPopulator implements PopulatorInterface
                 if (! empty($content)) {
                     $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
                     if (! $entry) {
-                        $this->indexInsertStmt->bindValue(1, $entity->{$idMethod}());
-                        $this->indexInsertStmt->bindValue(2, $class);
-                        $this->indexInsertStmt->bindValue(3, $field);
-                        $this->indexInsertStmt->bindValue(4, $content);
-                        $this->indexInsertStmt->executeStatement();
+                        $insertData = [];
+                        $insertSqlParts = [];
+                        $insertData[] = $entity->{$idMethod}();
+                        $insertData[] = $class;
+                        $insertData[] = $field;
+                        $insertData[] = (string) $content;
+                        $insertSqlParts[] = '(?,?,?,?)';
+
+                        $this->bulkInsert($insertSqlParts, $insertData);
                     } else {
-                        $this->indexUpdateStmt->bindValue(1, $content);
-                        $this->indexUpdateStmt->bindValue(2, $entry->getId());
-                        $this->indexUpdateStmt->executeStatement();
+                        $this->update($entry->getId(), $content);
                     }
                 }
             }
         }
-    }
-
-    public function remove(object $entity): void
-    {
-        if ($entity instanceof Index) {
-            return;
-        }
-        $oid = spl_object_hash($entity);
-        if (isset(static::$removeVisited[$oid])) {
-            return;
-        }
-        static::$removeVisited[$oid] = true;
-        $entityName = \get_class($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
-            return;
-        }
-        $classes = $this->getClassTree($entityName);
-        foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
-                continue;
-            }
-            $indexes = $this->indexManager->getIndexesOfEntity($class);
-            $idMethod = $this->indexManager->getIdMethod($entityName);
-            foreach (array_keys($indexes) as $field) {
-                $entry = $this->entityManager->getRepository(Index::class)->findExisting($class, $field, $entity->{$idMethod}());
-                if ($entry !== null) {
-                    $this->entityManager->remove($entry);
-                }
-            }
-        }
-
-        $this->entityManager->flush();
     }
 
     protected function prePopulate()
@@ -243,7 +215,7 @@ class StandardPopulator implements PopulatorInterface
                 // as well as gc
                 if ($i % 200 === 0) {
                     if (count($insertData)) {
-                        $this->bulkInsert($insertSqlParts, $insertData, $connection);
+                        $this->bulkInsert($insertSqlParts, $insertData);
                     }
                     $insertSqlParts = [];
                     $insertData = [];
@@ -256,7 +228,7 @@ class StandardPopulator implements PopulatorInterface
         }
 
         if (count($insertData)) {
-            $this->bulkInsert($insertSqlParts, $insertData, $connection);
+            $this->bulkInsert($insertSqlParts, $insertData);
         }
 
         $this->gc();
@@ -288,9 +260,24 @@ class StandardPopulator implements PopulatorInterface
         return $classes;
     }
 
-    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
+    private function bulkInsert(array $insertSqlParts, array $insertData)
     {
+        $connection = $this->entityManager->getConnection();
         $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
         $bulkInsertStatetment->executeStatement($insertData);
+    }
+
+    private function update(string $id, string $content)
+    {
+        $connection = $this->entityManager->getConnection();
+        $updateStatement = $connection->prepare('UPDATE whatwedo_search_index SET content=? WHERE id=?');
+        $updateStatement->executeStatement([$content, $id]);
+    }
+
+    private function delete(string $foreignId, string $model)
+    {
+        $connection = $this->entityManager->getConnection();
+        $updateStatement = $connection->prepare('DELETE FROM whatwedo_search_index WHERE foreign_id=? and model=?');
+        $updateStatement->executeStatement([$foreignId, $model]);
     }
 }
