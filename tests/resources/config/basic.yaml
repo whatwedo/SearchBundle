@@ -1,26 +1,26 @@
 whatwedo_search:
-    filterlists:
+    chains:
         list1:
             filters:
                 test:
-                    class: test
+                    class: whatwedo\SearchBundle\Filter\LowerCaseFilter
                 test1:
-                    class: test2
+                    class: whatwedo\SearchBundle\Tests\App\Filter\CustomFilter
                     options: { arg1: val1, arg2: vol2 }
                 test2:
-                    class: test3
+                    class: whatwedo\SearchBundle\Tests\App\Filter\CustomFilter
                     options:
                         arg1: val1
                         arg2: vol2
         list2:
             filters:
                 test:
-                    class: test
+                    class: whatwedo\SearchBundle\Filter\LowerCaseFilter
                 test1:
-                    class: test2
+                    class: whatwedo\SearchBundle\Tests\App\Filter\CustomFilter
                     options: { arg1: val1, arg2: vol2 }
                 test2:
-                    class: test3
+                    class: whatwedo\SearchBundle\Tests\App\Filter\CustomFilter
                     options:
                         arg1: val1
                         arg2: vol2

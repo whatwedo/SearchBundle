@@ -22,7 +22,9 @@ class FilterManagerTest extends KernelTestCase
         $filterManager = self::getContainer()->get(FilterManager::class);
 
         $filterManager->addTokenizer(new StandardTokenizer(), 'defaultChain');
-        $filterManager->addFilter(new LowerCaseFilter(), 'defaultChain');
+        $filter = new LowerCaseFilter();
+        $filter->setOptions([]);
+        $filterManager->addFilter($filter, 'defaultChain');
 
         $this->assertSame(
             'data1 data2',
@@ -35,7 +37,9 @@ class FilterManagerTest extends KernelTestCase
         /** @var FilterManager $filterManager */
         $filterManager = self::getContainer()->get(FilterManager::class);
 
-        $filterManager->addFilter(new LowerCaseFilter(), 'defaultChain');
+        $filter = new LowerCaseFilter();
+        $filter->setOptions([]);
+        $filterManager->addFilter($filter, 'defaultChain');
 
         $this->assertSame(
             'data1 data2',

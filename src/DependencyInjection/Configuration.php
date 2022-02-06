@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
         $rootNode
             ->children()
-                ->arrayNode('filterlists')
+                ->arrayNode('chains')
                     ->useAttributeAsKey('name')
                     ->arrayPrototype()
                         ->children()
