@@ -35,14 +35,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use whatwedo\CoreBundle\Command\BaseCommand;
 use whatwedo\SearchBundle\Populator\PopulateOutputInterface;
-use whatwedo\SearchBundle\Populator\StandardPopulator;
+use whatwedo\SearchBundle\Populator\PopulatorInterface;
 
 class PopulateCommand extends BaseCommand implements PopulateOutputInterface
 {
     private ?ProgressBar $progress = null;
 
     public function __construct(
-        protected StandardPopulator $standardPopulator
+        protected PopulatorInterface $populator
     ) {
         parent::__construct(null);
     }
@@ -80,7 +80,7 @@ class PopulateCommand extends BaseCommand implements PopulateOutputInterface
         // Initialize command
         parent::execute($input, $output);
 
-        $this->standardPopulator->populate($this, null);
+        $this->populator->populate($this, null);
 
         // Tear down
         $this->tearDown();

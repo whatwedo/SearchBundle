@@ -9,7 +9,6 @@ use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Populator\PopulatorInterface;
-use whatwedo\SearchBundle\Populator\StandardPopulator;
 use whatwedo\SearchBundle\Tests\App\Entity\Company;
 use whatwedo\SearchBundle\Tests\App\Entity\Person;
 use whatwedo\SearchBundle\Tests\App\Model\NotADoctrinieModel;
@@ -21,7 +20,7 @@ class PopulateTest extends AbstractSearchTest
         $this->createEntities();
 
         /** @var PopulatorInterface $populator */
-        $populator = self::getContainer()->get(StandardPopulator::class);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $populator->populate();
 
@@ -34,7 +33,7 @@ class PopulateTest extends AbstractSearchTest
         $this->createEntities();
 
         /** @var PopulatorInterface $populator */
-        $populator = self::getContainer()->get(StandardPopulator::class);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $populator->populate(null, Company::class);
 
@@ -45,7 +44,7 @@ class PopulateTest extends AbstractSearchTest
     public function testPopulateNotEntity()
     {
         /** @var PopulatorInterface $populator */
-        $populator = self::getContainer()->get(StandardPopulator::class);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $this->expectException(ClassNotDoctrineMappedException::class);
 
@@ -55,7 +54,7 @@ class PopulateTest extends AbstractSearchTest
     public function testPopulateNotIndexEntity()
     {
         /** @var PopulatorInterface $populator */
-        $populator = self::getContainer()->get(StandardPopulator::class);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $this->expectException(ClassNotIndexedEntityException::class);
 

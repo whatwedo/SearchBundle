@@ -7,6 +7,12 @@ services:
     whatwedo\SearchBundle\:
         resource: '../../*'
 
+
+    whatwedo\SearchBundle\Populator\PopulatorInterface:
+        class: whatwedo\SearchBundle\Populator\StandardPopulator
+
+
+
     whatwedo\SearchBundle\EventListener\IndexListener:
         tags:
             - { name: doctrine.event_subscriber, connection: default }

@@ -35,7 +35,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Manager\IndexManager;
-use whatwedo\SearchBundle\Populator\StandardPopulator;
+use whatwedo\SearchBundle\Populator\PopulatorInterface;
 
 class IndexListener implements EventSubscriber
 {
@@ -75,13 +75,13 @@ class IndexListener implements EventSubscriber
 
     private EntityManagerInterface $entityManager;
 
-    private StandardPopulator $populator;
+    private PopulatorInterface $populator;
 
     public function __construct(
         IndexManager $indexManager,
         FormatterManager $formatterManager,
         EntityManagerInterface $entityManager,
-        StandardPopulator $populator
+        PopulatorInterface $populator
     ) {
         $this->indexManager = $indexManager;
         $this->formatterManager = $formatterManager;
