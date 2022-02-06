@@ -21,3 +21,7 @@ services:
     whatwedo\SearchBundle\Manager\FilterManager:
         public: true
 
+
+    whatwedo\SearchBundle\Populator\OneFieldPopulator:
+        public: true
+
