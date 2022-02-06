@@ -1,0 +1,26 @@
+whatwedo_search:
+    filterlists:
+        list1:
+            filters:
+                test:
+                    class: test
+                test1:
+                    class: test2
+                    options: { arg1: val1, arg2: vol2 }
+                test2:
+                    class: test3
+                    options:
+                        arg1: val1
+                        arg2: vol2
+        list2:
+            filters:
+                test:
+                    class: test
+                test1:
+                    class: test2
+                    options: { arg1: val1, arg2: vol2 }
+                test2:
+                    class: test3
+                    options:
+                        arg1: val1
+                        arg2: vol2

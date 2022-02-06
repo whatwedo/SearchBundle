@@ -26,6 +26,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         => [
             __DIR__ . '/src/whatwedoSearchBundle.php',
             __DIR__ . '/src/DependencyInjection/whatwedoSearchExtension.php',
+        ],
+        PhpCsFixer\Fixer\Whitespace\MethodChainingIndentationFixer::class => [
+            __DIR__ . '/src/DependencyInjection/Configuration.php',
         ]
 
     ]);
