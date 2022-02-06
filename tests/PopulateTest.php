@@ -24,7 +24,7 @@ class PopulateTest extends AbstractSearchTest
 
         $populator->populate();
 
-        $this->assertSame(1400, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(140, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 
@@ -37,7 +37,7 @@ class PopulateTest extends AbstractSearchTest
 
         $populator->populate(null, Company::class);
 
-        $this->assertSame(400, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(40, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 

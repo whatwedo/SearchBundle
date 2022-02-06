@@ -23,22 +23,11 @@ abstract class AbstractSearchTest extends KernelTestCase
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
-        $entities = CompanyFactory::new()->withoutPersisting()->createMany(100);
-        foreach ($entities as $entity) {
-            $em->persist($entity->object());
-        }
+        CompanyFactory::createMany(10);
 
-        $em->flush();
+        ContactFactory::createMany(100);
 
-        $entities = ContactFactory::new()->withoutPersisting()->createMany(1000);
-
-        foreach ($entities as $entity) {
-            $em->persist($entity->object());
-        }
-
-        $em->flush();
-
-        $this->assertSame(100, $em->getRepository(Company::class)->count([]));
-        $this->assertSame(1000, $em->getRepository(Contact::class)->count([]));
+        $this->assertSame(10, $em->getRepository(Company::class)->count([]));
+        $this->assertSame(100, $em->getRepository(Contact::class)->count([]));
     }
 }

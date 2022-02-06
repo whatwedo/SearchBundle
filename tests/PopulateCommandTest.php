@@ -26,7 +26,7 @@ class PopulateCommandTest extends AbstractSearchTest
             ->assertOutputContains('Entity\Contact')
         ;
 
-        $this->assertSame(1400, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(140, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 }

@@ -19,7 +19,7 @@ class OneFieldPopulateTest extends AbstractSearchTest
 
         $populator->populate();
 
-        $this->assertSame(1100, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(110, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 }

@@ -45,7 +45,7 @@ class MatchAgainst extends FunctionNode
 
     public $mode;
 
-    public function parse(Parser $parser)
+    public function parse(Parser $parser): void
     {
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
