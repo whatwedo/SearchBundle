@@ -8,31 +8,22 @@ use Doctrine\Common\Annotations\Annotation;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"CLASS"})
  */
+#[\Attribute]
 class Searchable
 {
-    /**
-     * @var string
-     */
-    public $preSearch;
 
-    /**
-     * @var string
-     */
-    public $postSearch;
+    public function __construct(public ?string $preSearch, public ?string $postSearch)
+    {
+    }
 
-    /**
-     * @return string
-     */
     public function getPreSearch(): ? string
     {
         return $this->preSearch;
     }
 
-    /**
-     * @return string
-     */
     public function getPostSearch(): ? string
     {
         return $this->postSearch;

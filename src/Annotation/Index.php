@@ -34,6 +34,7 @@ use whatwedo\CoreBundle\Formatter\DefaultFormatter;
 
 /**
  * @Annotation
+ * @NamedArgumentConstructor
  * @Target({"PROPERTY", "METHOD"})
  */
 #[\Attribute]
