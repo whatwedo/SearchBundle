@@ -69,27 +69,30 @@ class IndexManager
     /**
      * Get indexes of given entity.
      */
-    public function getIndexesOfEntity(string $entity): array
+    public function getIndexesOfEntity(string $entityFqcn): array
     {
-        $fields = $this->getAnnotationFields($entity);
-        $fields = array_merge($fields, $this->getAttrubuteFields($entity));
+        if (!isset($this->entityFields[$entityFqcn])) {
+            $fields = $this->getAnnotationFields($entityFqcn);
+            $fields = array_merge($fields, $this->getAttrubuteFields($entityFqcn));
 
-        // Check if entities exists
-        if (isset($this->config['entities'])) {
-            foreach ($this->config['entities'] as $entityConfig) {
-                if ($entityConfig['class'] === $entity) {
-                    foreach ($entityConfig['fields'] as $fieldConfig) {
-                        $annotation = new Index();
-                        if (isset($fieldConfig['formatter'])) {
-                            $annotation->setFormatter($fieldConfig['formatter']);
+            // Check if entities exists
+            if (isset($this->config['entities'])) {
+                foreach ($this->config['entities'] as $entityConfig) {
+                    if ($entityConfig['class'] === $entityFqcn) {
+                        foreach ($entityConfig['fields'] as $fieldConfig) {
+                            $annotation = new Index();
+                            if (isset($fieldConfig['formatter'])) {
+                                $annotation->setFormatter($fieldConfig['formatter']);
+                            }
+                            $fields[$fieldConfig['name']] = $annotation;
                         }
-                        $fields[$fieldConfig['name']] = $annotation;
                     }
                 }
             }
+            $this->entityFields[$entityFqcn] = $fields;
         }
 
-        return $fields;
+        return $this->entityFields[$entityFqcn];
     }
 
     /**
