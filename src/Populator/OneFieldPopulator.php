@@ -53,7 +53,6 @@ class OneFieldPopulator extends AbstractPopulator
 
     public function remove(object $entity): void
     {
-
         if ($this->entityWasRemoved($entity)) {
             return;
         }
@@ -103,23 +102,13 @@ class OneFieldPopulator extends AbstractPopulator
                 continue;
             }
 
-            $indexes = $this->indexManager->getIndexesOfEntity($class);
             $idMethod = $this->indexManager->getIdMethod($class);
 
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-            $content = [];
-            foreach ($indexes as $field => $index) {
-                $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
-                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
-                if (method_exists($formatter, 'processOptions')) {
-                    $formatter->processOptions($index->getFormatterOptions());
-                }
-                $content[] = $formatter->getString($entity->{$fieldMethod}());
-            }
+            $content = $this->collectEntityIndexData($entityName, $entity);
 
             if (count($content)) {
-
-                $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
+                $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, 'field', $entity->{$idMethod}());
                 if (!$entry) {
                     $insertData = [];
                     $insertSqlParts = [];
@@ -190,15 +179,8 @@ class OneFieldPopulator extends AbstractPopulator
         $insertSqlParts = [];
 
         foreach ($entities as $entity) {
-            $content = [];
-            /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-            foreach ($indexes as $field => $index) {
-                $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
+            $content = $this->collectEntityIndexData($entityName, $entity[0]);
 
-                $formatter = $this->formatterManager->getFormatter($index->getFormatter());
-                $formatter->processOptions($index->getFormatterOptions());
-                $content[] = $formatter->getString($entity[0]->{$fieldMethod}());
-            }
             // Persist entry
             if (!empty($content)) {
                 $insertData[] = $entity[0]->{$idMethod}();
@@ -239,5 +221,20 @@ class OneFieldPopulator extends AbstractPopulator
     {
         $this->entityManager->clear();
         gc_collect_cycles();
+    }
+
+    protected function collectEntityIndexData($entityName, $entity): array
+    {
+        $indexes = $this->indexManager->getIndexesOfEntity($entityName);
+        $content = [];
+        /** @var \whatwedo\SearchBundle\Annotation\Index $index */
+        foreach ($indexes as $field => $index) {
+            $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
+
+            $formatter = $this->formatterManager->getFormatter($index->getFormatter());
+            $formatter->processOptions($index->getFormatterOptions());
+            $content[] = $formatter->getString($entity->{$fieldMethod}());
+        }
+        return $content;
     }
 }
