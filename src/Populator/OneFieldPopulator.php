@@ -14,25 +14,8 @@ use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
-class OneFieldPopulator implements PopulatorInterface
+class OneFieldPopulator extends AbstractPopulator
 {
-    protected static array $indexVisited = [];
-
-    protected static array $removeVisited = [];
-
-    private PopulateOutputInterface $output;
-
-    private bool $disabled;
-
-    public function __construct(
-        protected EntityManagerInterface $entityManager,
-        protected IndexManager $indexManager,
-        protected FormatterManager $formatterManager
-    ) {
-        $entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
-        $this->output = new NullPopulateOutput();
-    }
-
     public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
     {
         if ($output) {
@@ -54,7 +37,7 @@ class OneFieldPopulator implements PopulatorInterface
                 throw new ClassNotDoctrineMappedException($entityClass);
             }
 
-            if ($entityClass && ! \in_array($entityClass, $entities, true)) {
+            if ($entityClass && !\in_array($entityClass, $entities, true)) {
                 throw new ClassNotIndexedEntityException($entityClass);
             }
         }
@@ -70,23 +53,27 @@ class OneFieldPopulator implements PopulatorInterface
 
     public function remove(object $entity): void
     {
-        $oid = spl_object_hash($entity);
-        if (isset(static::$removeVisited[$oid])) {
+
+        if ($this->entityWasRemoved($entity)) {
             return;
         }
-        static::$removeVisited[$oid] = true;
+
+        if ($this->disableEntityListener) {
+            return;
+        }
+
         $entityName = ClassUtils::getClass($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
+        if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
+            if (!$this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || !$this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
             $idMethod = $this->indexManager->getIdMethod($entityName);
-            $this->delete((string) $entity->{$idMethod}(), $class);
+            $this->delete((string)$entity->{$idMethod}(), $class);
         }
     }
 
@@ -95,20 +82,24 @@ class OneFieldPopulator implements PopulatorInterface
         if ($entity instanceof Index) {
             return;
         }
-        $oid = spl_object_hash($entity);
-        if (isset(static::$indexVisited[$oid])) {
+
+        if ($this->entityWasIndexed($entity)) {
             return;
         }
-        static::$indexVisited[$oid] = true;
+
+        if ($this->disableEntityListener) {
+            return;
+        }
+
         $entityName = ClassUtils::getClass($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
+        if (!$this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
+            if (!$this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || !$this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
 
@@ -116,28 +107,31 @@ class OneFieldPopulator implements PopulatorInterface
             $idMethod = $this->indexManager->getIdMethod($class);
 
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
+            $content = [];
             foreach ($indexes as $field => $index) {
                 $fieldMethod = $this->indexManager->getFieldAccessorMethod($class, $field);
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
                 if (method_exists($formatter, 'processOptions')) {
                     $formatter->processOptions($index->getFormatterOptions());
                 }
-                $content = $formatter->getString($entity->{$fieldMethod}());
-                if (! empty($content)) {
-                    $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
-                    if (! $entry) {
-                        $insertData = [];
-                        $insertSqlParts = [];
-                        $insertData[] = $entity->{$idMethod}();
-                        $insertData[] = $class;
-                        $insertData[] = $field;
-                        $insertData[] = (string) $content;
-                        $insertSqlParts[] = '(?,?,?,?)';
+                $content[] = $formatter->getString($entity->{$fieldMethod}());
+            }
 
-                        $this->bulkInsert($insertSqlParts, $insertData);
-                    } else {
-                        $this->update($entry->getId(), $content);
-                    }
+            if (count($content)) {
+
+                $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $field, $entity->{$idMethod}());
+                if (!$entry) {
+                    $insertData = [];
+                    $insertSqlParts = [];
+                    $insertData[] = $entity->{$idMethod}();
+                    $insertData[] = $class;
+                    $insertData[] = 'field';
+                    $insertData[] = implode(' ' , $content);
+                    $insertSqlParts[] = '(?,?,?,?)';
+
+                    $this->bulkInsert($insertSqlParts, $insertData);
+                } else {
+                    $this->update($entry->{$idMethod}(), implode(' ' , $content));
                 }
             }
         }
@@ -206,7 +200,7 @@ class OneFieldPopulator implements PopulatorInterface
                 $content[] = $formatter->getString($entity[0]->{$fieldMethod}());
             }
             // Persist entry
-            if (! empty($content)) {
+            if (!empty($content)) {
                 $insertData[] = $entity[0]->{$idMethod}();
                 $insertData[] = $entityName;
                 $insertData[] = 'field';
@@ -245,41 +239,5 @@ class OneFieldPopulator implements PopulatorInterface
     {
         $this->entityManager->clear();
         gc_collect_cycles();
-    }
-
-    /**
-     * Get class tree.
-     *
-     * @param $className
-     *
-     * @return array
-     */
-    protected function getClassTree($className)
-    {
-        $classes = class_parents($className);
-        array_unshift($classes, $className);
-
-        return $classes;
-    }
-
-    private function bulkInsert(array $insertSqlParts, array $insertData)
-    {
-        $connection = $this->entityManager->getConnection();
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
-        $bulkInsertStatetment->executeStatement($insertData);
-    }
-
-    private function update(string $id, string $content)
-    {
-        $connection = $this->entityManager->getConnection();
-        $updateStatement = $connection->prepare('UPDATE whatwedo_search_index SET content=? WHERE id=?');
-        $updateStatement->executeStatement([$content, $id]);
-    }
-
-    private function delete(string $foreignId, string $model)
-    {
-        $connection = $this->entityManager->getConnection();
-        $updateStatement = $connection->prepare('DELETE FROM whatwedo_search_index WHERE foreign_id=? and model=?');
-        $updateStatement->executeStatement([$foreignId, $model]);
     }
 }

@@ -17,12 +17,10 @@ class PopulateTest extends AbstractSearchTest
 {
     public function testPopulate()
     {
-        $this->createEntities();
-
-        /** @var PopulatorInterface $populator */
         $populator = self::getContainer()->get(PopulatorInterface::class);
+        $populator->resetVisited();
 
-        $populator->populate();
+        $this->createEntities();
 
         $this->assertSame(140, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
@@ -60,4 +58,18 @@ class PopulateTest extends AbstractSearchTest
 
         $populator->populate(null, Person::class);
     }
+
+
+    public function testDisablePopulate()
+    {
+        /** @var PopulatorInterface $populator */
+        $populator = self::getContainer()->get(PopulatorInterface::class);
+        $populator->disableEntityListener(true);
+
+        $this->createEntities();
+
+        $this->assertSame(0, self::getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Index::class)->count([]));
+    }
+
 }

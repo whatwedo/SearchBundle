@@ -14,25 +14,13 @@ use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
-class StandardPopulator implements PopulatorInterface
+class StandardPopulator extends AbstractPopulator
 {
-    protected static array $indexVisited = [];
-
-    protected static array $removeVisited = [];
-
-    private PopulateOutputInterface $output;
-
-    public function __construct(
-        protected EntityManagerInterface $entityManager,
-        protected IndexManager $indexManager,
-        protected FormatterManager $formatterManager
-    ) {
-        $entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
-        $this->output = new NullPopulateOutput();
-    }
-
     public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
     {
+        if ($this->disableEntityListener) {
+            return;
+        }
         if ($output) {
             $this->output = $output;
         }
@@ -68,11 +56,10 @@ class StandardPopulator implements PopulatorInterface
 
     public function remove(object $entity): void
     {
-        $oid = spl_object_hash($entity);
-        if (isset(static::$removeVisited[$oid])) {
+        if ($this->entityWasRemoved($entity)) {
             return;
         }
-        static::$removeVisited[$oid] = true;
+
         $entityName = ClassUtils::getClass($entity);
         if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
@@ -90,14 +77,18 @@ class StandardPopulator implements PopulatorInterface
 
     public function index(object $entity)
     {
+        if ($this->disableEntityListener) {
+            return;
+        }
+
         if ($entity instanceof Index) {
             return;
         }
-        $oid = spl_object_hash($entity);
-        if (isset(static::$indexVisited[$oid])) {
+
+        if ($this->entityWasIndexed($entity)) {
             return;
         }
-        static::$indexVisited[$oid] = true;
+
         $entityName = ClassUtils::getClass($entity);
         if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
@@ -245,39 +236,5 @@ class StandardPopulator implements PopulatorInterface
         gc_collect_cycles();
     }
 
-    /**
-     * Get class tree.
-     *
-     * @param $className
-     *
-     * @return array
-     */
-    protected function getClassTree($className)
-    {
-        $classes = class_parents($className);
-        array_unshift($classes, $className);
 
-        return $classes;
-    }
-
-    private function bulkInsert(array $insertSqlParts, array $insertData)
-    {
-        $connection = $this->entityManager->getConnection();
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
-        $bulkInsertStatetment->executeStatement($insertData);
-    }
-
-    private function update(string $id, string $content)
-    {
-        $connection = $this->entityManager->getConnection();
-        $updateStatement = $connection->prepare('UPDATE whatwedo_search_index SET content=? WHERE id=?');
-        $updateStatement->executeStatement([$content, $id]);
-    }
-
-    private function delete(string $foreignId, string $model)
-    {
-        $connection = $this->entityManager->getConnection();
-        $updateStatement = $connection->prepare('DELETE FROM whatwedo_search_index WHERE foreign_id=? and model=?');
-        $updateStatement->executeStatement([$foreignId, $model]);
-    }
 }

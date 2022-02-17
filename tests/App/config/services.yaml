@@ -22,6 +22,11 @@ services:
         public: true
 
 
+    whatwedo\SearchBundle\Populator\PopulatorInterface:
+        class: whatwedo\SearchBundle\Populator\StandardPopulator
+        public: true
+
+
     whatwedo\SearchBundle\Populator\OneFieldPopulator:
         public: true
 
