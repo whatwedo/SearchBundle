@@ -70,4 +70,9 @@ class Index
 
         return $this;
     }
+
+    public function getGroups(): array
+    {
+        return $this->groups;
+    }
 }

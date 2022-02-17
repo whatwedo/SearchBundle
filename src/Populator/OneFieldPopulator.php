@@ -105,22 +105,22 @@ class OneFieldPopulator extends AbstractPopulator
             $idMethod = $this->indexManager->getIdMethod($class);
 
             /** @var \whatwedo\SearchBundle\Annotation\Index $index */
-            $content = $this->collectEntityIndexData($entityName, $entity);
+            $groupedContent = $this->collectEntityIndexData($entityName, $entity);
 
-            if (count($content)) {
-                $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, 'field', $entity->{$idMethod}());
+            foreach ($groupedContent as $group => $content) {
+                $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $group, $entity->{$idMethod}());
                 if (!$entry) {
                     $insertData = [];
                     $insertSqlParts = [];
                     $insertData[] = $entity->{$idMethod}();
                     $insertData[] = $class;
-                    $insertData[] = 'field';
-                    $insertData[] = implode(' ' , $content);
+                    $insertData[] = $group;
+                    $insertData[] = implode(' ', $content);
                     $insertSqlParts[] = '(?,?,?,?)';
 
                     $this->bulkInsert($insertSqlParts, $insertData);
                 } else {
-                    $this->update($entry->{$idMethod}(), implode(' ' , $content));
+                    $this->update($entry->{$idMethod}(), implode(' ', $content));
                 }
             }
         }
@@ -179,13 +179,13 @@ class OneFieldPopulator extends AbstractPopulator
         $insertSqlParts = [];
 
         foreach ($entities as $entity) {
-            $content = $this->collectEntityIndexData($entityName, $entity[0]);
+            $groupedContent = $this->collectEntityIndexData($entityName, $entity[0]);
 
             // Persist entry
-            if (!empty($content)) {
+            foreach ($groupedContent as $group => $content) {
                 $insertData[] = $entity[0]->{$idMethod}();
                 $insertData[] = $entityName;
-                $insertData[] = 'field';
+                $insertData[] = $group;
                 $insertData[] = implode(' ', $content);
                 $insertSqlParts[] = '(?,?,?,?)';
             }
@@ -226,14 +226,18 @@ class OneFieldPopulator extends AbstractPopulator
     protected function collectEntityIndexData($entityName, $entity): array
     {
         $indexes = $this->indexManager->getIndexesOfEntity($entityName);
+
         $content = [];
         /** @var \whatwedo\SearchBundle\Annotation\Index $index */
         foreach ($indexes as $field => $index) {
+
             $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
 
             $formatter = $this->formatterManager->getFormatter($index->getFormatter());
             $formatter->processOptions($index->getFormatterOptions());
-            $content[] = $formatter->getString($entity->{$fieldMethod}());
+            foreach ($index->getGroups() as $indexGroup) {
+                $content[$indexGroup][] = $formatter->getString($entity->{$fieldMethod}());
+            }
         }
         return $content;
     }
