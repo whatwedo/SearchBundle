@@ -8,7 +8,7 @@ services:
         resource: '../../*'
 
     whatwedo\SearchBundle\Populator\PopulatorInterface:
-        class: whatwedo\SearchBundle\Populator\StandardPopulator
+        class: whatwedo\SearchBundle\Populator\OneFieldPopulator
 
     whatwedo\SearchBundle\EventListener\IndexListener:
         tags:
