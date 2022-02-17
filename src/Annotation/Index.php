@@ -42,6 +42,7 @@ class Index
 {
     public function __construct(
         public string $formatter = DefaultFormatter::class,
+        public array $groups = ['default'],
         public array $formatterOptions = [])
     {
     }

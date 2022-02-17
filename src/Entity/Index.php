@@ -45,7 +45,7 @@ use Doctrine\ORM\Mapping as ORM;
  *              columns={
  *                  "foreign_id",
  *                  "model",
- *                  "field"
+ *                  "grp"
  *              }
  *          )
  *     }
@@ -79,9 +79,9 @@ class Index
     /**
      * @var string
      *
-     * @ORM\Column(name="field", type="string", length=90, nullable=false)
+     * @ORM\Column(name="grp", type="string", length=90, nullable=false)
      */
-    protected $field;
+    protected $group;
 
     /**
      * @var string
@@ -153,19 +153,19 @@ class Index
     /**
      * @return string
      */
-    public function getField()
+    public function getGroup()
     {
-        return $this->field;
+        return $this->group;
     }
 
     /**
-     * @param string $field
+     * @param string $group
      *
      * @return self
      */
-    public function setField($field)
+    public function setGroup($group)
     {
-        $this->field = $field;
+        $this->group = $group;
 
         return $this;
     }

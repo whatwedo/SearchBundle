@@ -125,7 +125,7 @@ class StandardPopulator extends AbstractPopulator
 
                         $this->bulkInsert($insertSqlParts, $insertData);
                     } else {
-                        $this->update($entry->getId(), $content);
+                        $this->update($entry->{$idMethod}(), $content);
                     }
                 }
             }

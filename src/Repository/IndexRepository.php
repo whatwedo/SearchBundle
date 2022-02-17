@@ -46,11 +46,11 @@ class IndexRepository extends ServiceEntityRepository
     /**
      * @param $query
      * @param string|null $entity
-     * @param string|null $field
+     * @param string|null $group
      *
      * @return array
      */
-    public function search($query, $entity = null, $field = null)
+    public function search($query, $entity = null, $group = null)
     {
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
@@ -69,9 +69,9 @@ class IndexRepository extends ServiceEntityRepository
                 ->setParameter('entity', $entity);
         }
 
-        if ($field) {
-            $qb->andWhere('i.field = :fieldName')
-                ->setParameter('fieldName', $field);
+        if ($group) {
+            $qb->andWhere('i.group = :group')
+                ->setParameter('group', $group);
         }
 
         if ($entity) {
@@ -87,7 +87,7 @@ class IndexRepository extends ServiceEntityRepository
                 if ($class && class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     if ($reflection->implementsInterface(PreSearchInterface::class)) {
-                        (new $class())->preSearch($qb, $query, $entity, $field);
+                        (new $class())->preSearch($qb, $query, $entity, $group);
                     }
                 }
             }
@@ -102,7 +102,7 @@ class IndexRepository extends ServiceEntityRepository
                 if ($class && class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     if ($reflection->implementsInterface(PostSearchInterface::class)) {
-                        $result = (new $class())->postSearch($result, $query, $entity, $field);
+                        $result = (new $class())->postSearch($result, $query, $entity, $group);
                     }
                 }
             }
@@ -124,7 +124,7 @@ class IndexRepository extends ServiceEntityRepository
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      */
-    public function searchEntities($query, array $entities = [], array $fields = [])
+    public function searchEntities($query, array $entities = [], array $groups = [])
     {
         $qb = $this->createQueryBuilder('i');
         $qb->select('i.foreignId as id');
@@ -150,9 +150,9 @@ class IndexRepository extends ServiceEntityRepository
             $ors
         );
 
-        foreach ($fields as $key => $field) {
-            $qb->andWhere('i.field = :fieldName_' . $key)
-                ->setParameter('fieldName_' . $key, $field);
+        foreach ($groups as $key => $group) {
+            $qb->andWhere('i.group = :groupName_' . $key)
+                ->setParameter(':groupName_' . $key, $group);
         }
 
         $result = $qb->getQuery()->getResult();
@@ -160,21 +160,15 @@ class IndexRepository extends ServiceEntityRepository
         return $result;
     }
 
-    /**
-     * @param $entity
-     * @param $field
-     * @param $foreignId
-     *
-     * @return Index|null
-     */
-    public function findExisting($entity, $field, $foreignId)
+
+    public function findExisting(string $entityFqcn, string $group, int $foreignId): ?Index
     {
         return $this->createQueryBuilder('i')
             ->where('i.model = :entity')
-            ->andWhere('i.field = :field')
+            ->andWhere('i.group = :group')
             ->andWhere('i.foreignId = :foreignId')
-            ->setParameter('entity', $entity)
-            ->setParameter('field', $field)
+            ->setParameter('entity', $entityFqcn)
+            ->setParameter('group', $group)
             ->setParameter('foreignId', $foreignId)
             ->getQuery()
             ->getOneOrNullResult();

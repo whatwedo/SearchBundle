@@ -38,7 +38,7 @@ abstract class AbstractPopulator implements PopulatorInterface
     protected function bulkInsert(array $insertSqlParts, array $insertData)
     {
         $connection = $this->entityManager->getConnection();
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
+        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, grp, content) VALUES ' . implode(',', $insertSqlParts));
         $bulkInsertStatetment->executeStatement($insertData);
     }
 

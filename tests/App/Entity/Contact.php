@@ -27,6 +27,7 @@ class Contact implements \Stringable
      * @Assert\NotNull()
      * @Index()
      */
+    #[Index(groups: ['default', 'contacts', 'global'])]
     private ?string $name = null;
 
     /**

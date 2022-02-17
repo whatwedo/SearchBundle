@@ -28,7 +28,7 @@ class IndexListenerTest extends AbstractSearchTest
         foreach ($indexResults as $indexResult) {
             if ($indexResult->getModel() === Company::class) {
                 $value = null;
-                switch ($indexResult->getField()) {
+                switch ($indexResult->getGroup()) {
                     case 'name':
                         $value = $contact->getCompany()->getName();
                         break;
@@ -76,7 +76,7 @@ class IndexListenerTest extends AbstractSearchTest
         foreach ($indexResults as $indexResult) {
             if ($indexResult->getModel() === Company::class) {
                 $value = null;
-                switch ($indexResult->getField()) {
+                switch ($indexResult->getGroup()) {
                     case 'name':
                         $value = $contact->getCompany()->getName();
                         break;
