@@ -11,12 +11,17 @@ use whatwedo\SearchBundle\Populator\PopulatorInterface;
 
 class OneFieldPopulateTest extends AbstractIndexTest
 {
-
+    protected function setUp(): void
+    {
+        /** @var OneFieldPopulator $populator */
+        $populator = self::getContainer()->get(OneFieldPopulator::class);
+        self::getContainer()->set(PopulatorInterface::class, $populator);
+    }
 
     public function testPopulate()
     {
         /** @var OneFieldPopulator $populator */
-        $populator = self::getContainer()->get(OneFieldPopulator::class);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $this->createEntities();
 
@@ -28,10 +33,6 @@ class OneFieldPopulateTest extends AbstractIndexTest
 
     public function testListnerPopulate()
     {
-        /** @var OneFieldPopulator $populator */
-        $populator = self::getContainer()->get(OneFieldPopulator::class);
-        self::getContainer()->set(PopulatorInterface::class, $populator);
-
         $this->createEntities();
 
         $this->assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
@@ -41,8 +42,7 @@ class OneFieldPopulateTest extends AbstractIndexTest
     public function testDisableListnerPopulate()
     {
         /** @var OneFieldPopulator $populator */
-        $populator = self::getContainer()->get(OneFieldPopulator::class);
-        self::getContainer()->set(PopulatorInterface::class, $populator);
+        $populator = self::getContainer()->get(PopulatorInterface::class);
 
         $populator->disableEntityListener(true);
 

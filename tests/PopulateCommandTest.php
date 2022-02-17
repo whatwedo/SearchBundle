@@ -14,9 +14,6 @@ class PopulateCommandTest extends AbstractIndexTest
 
     public function testPopulateCommand()
     {
-        $this->_resetSchema();
-        $this->_resetDatabase();
-
         $this->createEntities();
 
         $this->executeConsoleCommand('whatwedo:search:populate')
@@ -26,7 +23,7 @@ class PopulateCommandTest extends AbstractIndexTest
             ->assertOutputContains('Entity\Contact')
         ;
 
-        $this->assertSame(140, self::getContainer()->get(EntityManagerInterface::class)
+        $this->assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 }

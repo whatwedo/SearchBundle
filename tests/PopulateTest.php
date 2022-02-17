@@ -8,13 +8,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
+use whatwedo\SearchBundle\Populator\OneFieldPopulator;
 use whatwedo\SearchBundle\Populator\PopulatorInterface;
+use whatwedo\SearchBundle\Populator\StandardPopulator;
 use whatwedo\SearchBundle\Tests\App\Entity\Company;
 use whatwedo\SearchBundle\Tests\App\Entity\Person;
 use whatwedo\SearchBundle\Tests\App\Model\NotADoctrinieModel;
 
 class PopulateTest extends AbstractIndexTest
 {
+    protected function setUp(): void
+    {
+        /** @var OneFieldPopulator $populator */
+        $populator = self::getContainer()->get(StandardPopulator::class);
+        self::getContainer()->set(PopulatorInterface::class, $populator);
+    }
+
     public function testPopulate()
     {
         $populator = self::getContainer()->get(PopulatorInterface::class);

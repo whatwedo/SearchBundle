@@ -23,10 +23,12 @@ services:
 
 
     whatwedo\SearchBundle\Populator\PopulatorInterface:
-        class: whatwedo\SearchBundle\Populator\StandardPopulator
+        class: whatwedo\SearchBundle\Populator\OneFieldPopulator
         public: true
 
-
     whatwedo\SearchBundle\Populator\OneFieldPopulator:
+        public: true
+
+    whatwedo\SearchBundle\Populator\StandardPopulator:
         public: true
 

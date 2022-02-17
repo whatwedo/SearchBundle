@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Tests\App\Entity\Company;
 use whatwedo\SearchBundle\Tests\App\Entity\Contact;
+use whatwedo\SearchBundle\Tests\App\Factory\CompanyFactory;
 use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 
 class IndexListenerTest extends AbstractIndexTest
@@ -19,31 +20,37 @@ class IndexListenerTest extends AbstractIndexTest
         $this->assertSame(0, $em->getRepository(Index::class)->count([]));
 
         /** @var Contact $contact */
-        $contact = ContactFactory::createOne()->object();
+        $contact = ContactFactory::createOne([
+            'name' => 'Maurizio Monticelli',
+            'company' => CompanyFactory::createOne([
+                'name' => 'whatwedo GmbH',
+                'city' => 'Bern',
+                'country' => 'Switzerland',
+                'taxIdentificationNumber' => '12344566'
+            ])
+
+        ])->object();
 
         $indexResults = $em->getRepository(Index::class)->findAll();
-        $this->assertSame(5, count($indexResults));
+        $this->assertSame(6, count($indexResults));
 
         /** @var Index $indexResult */
         foreach ($indexResults as $indexResult) {
             if ($indexResult->getModel() === Company::class) {
                 $value = null;
                 switch ($indexResult->getGroup()) {
-                    case 'name':
-                        $value = $contact->getCompany()->getName();
+                    case 'default':
+                        $value = 'whatwedo GmbH dummy Switzerland 12344566';
                         break;
-                    case 'city':
-                        $value = 'dummy';
+                    case 'company':
+                        $value = 'whatwedo GmbH';
                         break;
-                    case 'country':
-                        $value = $contact->getCompany()->getCountry();
-                        break;
-                    case 'taxIdentificationNumber':
-                        $value = $contact->getCompany()->getTaxIdentificationNumber();
+                    case 'global':
+                        $value = 'whatwedo GmbH';
                         break;
                 }
 
-                $this->assertSame($value, $indexResult->getContent());
+                $this->assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
             }
         }
     }
@@ -54,7 +61,16 @@ class IndexListenerTest extends AbstractIndexTest
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
         /** @var Contact $contact */
-        $contact = ContactFactory::createOne()->object();
+        $contact = ContactFactory::createOne([
+            'name' => 'Maurizio Monticelli',
+            'company' => CompanyFactory::createOne([
+                'name' => 'whatwedo GmbH',
+                'city' => 'Bern',
+                'country' => 'Switzerland',
+                'taxIdentificationNumber' => '12344566'
+            ])
+
+        ])->object();
 
         $contactId = $contact->getId();
 
@@ -77,21 +93,18 @@ class IndexListenerTest extends AbstractIndexTest
             if ($indexResult->getModel() === Company::class) {
                 $value = null;
                 switch ($indexResult->getGroup()) {
-                    case 'name':
-                        $value = $contact->getCompany()->getName();
+                    case 'default':
+                        $value = 'company dummy county 123456';
                         break;
-                    case 'city':
-                        $value = 'dummy';
+                    case 'company':
+                        $value = 'company';
                         break;
-                    case 'country':
-                        $value = $contact->getCompany()->getCountry();
-                        break;
-                    case 'taxIdentificationNumber':
-                        $value = $contact->getCompany()->getTaxIdentificationNumber();
+                    case 'global':
+                        $value = 'company';
                         break;
                 }
 
-                $this->assertSame($value, $indexResult->getContent());
+                $this->assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
             }
         }
     }
@@ -120,7 +133,7 @@ class IndexListenerTest extends AbstractIndexTest
 
         $indexResults = $em->getRepository(Index::class)->findAll();
 
-        $this->assertCount(5, $indexResults);
+        $this->assertCount(6, $indexResults);
 
         $contact = $em->getRepository(Contact::class)->find($contactId);
         $em->remove($contact);
