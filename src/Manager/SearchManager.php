@@ -22,7 +22,7 @@ class SearchManager
     public function searchByEntites(string $searchTerm, array $entityFqcns = [], array $groups = [])
     {
         $indexResults = $this->indexRepository->searchEntities($searchTerm, $entityFqcns, $groups);
-        $groupedEntities = $this->loadEntities($indexResults);
+        $loadedEntities = $this->loadEntities($indexResults);
         $entities = [];
 
         foreach ($indexResults as $searchResult) {
@@ -31,7 +31,7 @@ class SearchManager
                     $searchResult['id'],
                     $searchResult['model'],
                     (float) $searchResult['_matchQuote'],
-                    $groupedEntities[$searchResult['model']][$searchResult['id']]
+                    $loadedEntities[$searchResult['model']][$searchResult['id']]
                 );
         }
 

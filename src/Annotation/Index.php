@@ -45,8 +45,7 @@ class Index
         public array $groups = ['default'],
         public array $formatterOptions = [
         ]
-    )
-    {
+    ) {
     }
 
     public function getFormatter(): string
