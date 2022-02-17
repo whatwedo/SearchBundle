@@ -14,9 +14,10 @@ use Doctrine\Common\Annotations\Annotation;
 #[\Attribute]
 class Searchable
 {
-
-    public function __construct(public ?string $preSearch, public ?string $postSearch)
-    {
+    public function __construct(
+        public ?string $preSearch,
+        public ?string $postSearch
+    ) {
     }
 
     public function getPreSearch(): ? string

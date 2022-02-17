@@ -11,13 +11,6 @@ use whatwedo\SearchBundle\Populator\PopulatorInterface;
 
 class OneFieldPopulateTest extends AbstractIndexTest
 {
-    protected function setUp(): void
-    {
-        /** @var OneFieldPopulator $populator */
-        $populator = self::getContainer()->get(OneFieldPopulator::class);
-        self::getContainer()->set(PopulatorInterface::class, $populator);
-    }
-
     public function testPopulate()
     {
         /** @var OneFieldPopulator $populator */
@@ -50,5 +43,12 @@ class OneFieldPopulateTest extends AbstractIndexTest
 
         $this->assertSame(0, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
+    }
+
+    protected function setUp(): void
+    {
+        /** @var OneFieldPopulator $populator */
+        $populator = self::getContainer()->get(OneFieldPopulator::class);
+        self::getContainer()->set(PopulatorInterface::class, $populator);
     }
 }

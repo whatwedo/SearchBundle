@@ -17,13 +17,6 @@ use whatwedo\SearchBundle\Tests\App\Model\NotADoctrinieModel;
 
 class PopulateTest extends AbstractIndexTest
 {
-    protected function setUp(): void
-    {
-        /** @var OneFieldPopulator $populator */
-        $populator = self::getContainer()->get(StandardPopulator::class);
-        self::getContainer()->set(PopulatorInterface::class, $populator);
-    }
-
     public function testPopulate()
     {
         $populator = self::getContainer()->get(PopulatorInterface::class);
@@ -68,7 +61,6 @@ class PopulateTest extends AbstractIndexTest
         $populator->populate(null, Person::class);
     }
 
-
     public function testDisablePopulate()
     {
         /** @var PopulatorInterface $populator */
@@ -81,4 +73,10 @@ class PopulateTest extends AbstractIndexTest
             ->getRepository(Index::class)->count([]));
     }
 
+    protected function setUp(): void
+    {
+        /** @var OneFieldPopulator $populator */
+        $populator = self::getContainer()->get(StandardPopulator::class);
+        self::getContainer()->set(PopulatorInterface::class, $populator);
+    }
 }

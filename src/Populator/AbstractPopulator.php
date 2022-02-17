@@ -4,15 +4,9 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Populator;
 
-use Doctrine\Common\Util\ClassUtils;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
-use whatwedo\SearchBundle\Entity\Index;
-use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
-use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
-use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 abstract class AbstractPopulator implements PopulatorInterface
 {
@@ -33,7 +27,16 @@ abstract class AbstractPopulator implements PopulatorInterface
         $this->output = new NullPopulateOutput();
     }
 
+    public function disableEntityListener(bool $disable)
+    {
+        $this->disableEntityListener = $disable;
+    }
 
+    public function resetVisited(): void
+    {
+        $this->removeVisited = [];
+        $this->indexVisited = [];
+    }
 
     protected function bulkInsert(array $insertSqlParts, array $insertData)
     {
@@ -56,14 +59,8 @@ abstract class AbstractPopulator implements PopulatorInterface
         $updateStatement->executeStatement([$foreignId, $model]);
     }
 
-
-    public function disableEntityListener(bool $disable)
+    protected function entityWasIndexed(object $entity): bool
     {
-        $this->disableEntityListener = $disable;
-    }
-
-
-    protected function entityWasIndexed(object $entity): bool {
         $oid = spl_object_hash($entity);
         if (isset($this->indexVisited[$oid])) {
             return true;
@@ -80,12 +77,8 @@ abstract class AbstractPopulator implements PopulatorInterface
             return true;
         }
         $this->removeVisited[$oid] = true;
-        return false;
-    }
 
-    public function resetVisited(): void {
-        $this->removeVisited = [];
-        $this->indexVisited = [];
+        return false;
     }
 
     protected function getClassTree($entityFqcn): array

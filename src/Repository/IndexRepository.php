@@ -160,7 +160,6 @@ class IndexRepository extends ServiceEntityRepository
         return $result;
     }
 
-
     public function findExisting(string $entityFqcn, string $group, int $foreignId): ?Index
     {
         return $this->createQueryBuilder('i')

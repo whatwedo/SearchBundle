@@ -10,5 +10,5 @@ interface PopulatorInterface
 
     public function disableEntityListener(bool $disable);
 
-    public function resetVisited() :void   ;
+    public function resetVisited(): void;
 }

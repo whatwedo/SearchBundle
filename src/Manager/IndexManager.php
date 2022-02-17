@@ -71,7 +71,7 @@ class IndexManager
      */
     public function getIndexesOfEntity(string $entityFqcn): array
     {
-        if (!isset($this->entityFields[$entityFqcn])) {
+        if (! isset($this->entityFields[$entityFqcn])) {
             $fields = $this->getAnnotationFields($entityFqcn);
             $fields = array_merge($fields, $this->getAttrubuteFields($entityFqcn));
 

@@ -6,12 +6,9 @@ namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
-use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class StandardPopulator extends AbstractPopulator
@@ -235,6 +232,4 @@ class StandardPopulator extends AbstractPopulator
         $this->entityManager->clear();
         gc_collect_cycles();
     }
-
-
 }

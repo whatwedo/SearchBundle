@@ -20,15 +20,14 @@ class IndexListenerTest extends AbstractIndexTest
         $this->assertSame(0, $em->getRepository(Index::class)->count([]));
 
         /** @var Contact $contact */
-        $contact = ContactFactory::createOne([
+        ContactFactory::createOne([
             'name' => 'Maurizio Monticelli',
             'company' => CompanyFactory::createOne([
                 'name' => 'whatwedo GmbH',
                 'city' => 'Bern',
                 'country' => 'Switzerland',
-                'taxIdentificationNumber' => '12344566'
-            ])
-
+                'taxIdentificationNumber' => '12344566',
+            ]),
         ])->object();
 
         $indexResults = $em->getRepository(Index::class)->findAll();
@@ -67,9 +66,8 @@ class IndexListenerTest extends AbstractIndexTest
                 'name' => 'whatwedo GmbH',
                 'city' => 'Bern',
                 'country' => 'Switzerland',
-                'taxIdentificationNumber' => '12344566'
-            ])
-
+                'taxIdentificationNumber' => '12344566',
+            ]),
         ])->object();
 
         $contactId = $contact->getId();

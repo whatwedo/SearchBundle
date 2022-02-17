@@ -6,12 +6,9 @@ namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
-use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
-use whatwedo\SearchBundle\Manager\IndexManager;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class OneFieldPopulator extends AbstractPopulator
@@ -37,7 +34,7 @@ class OneFieldPopulator extends AbstractPopulator
                 throw new ClassNotDoctrineMappedException($entityClass);
             }
 
-            if ($entityClass && !\in_array($entityClass, $entities, true)) {
+            if ($entityClass && ! \in_array($entityClass, $entities, true)) {
                 throw new ClassNotIndexedEntityException($entityClass);
             }
         }
@@ -62,17 +59,17 @@ class OneFieldPopulator extends AbstractPopulator
         }
 
         $entityName = ClassUtils::getClass($entity);
-        if (!$this->indexManager->hasEntityIndexes($entityName)) {
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || !$this->indexManager->hasEntityIndexes($class)) {
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
             $idMethod = $this->indexManager->getIdMethod($entityName);
-            $this->delete((string)$entity->{$idMethod}(), $class);
+            $this->delete((string) $entity->{$idMethod}(), $class);
         }
     }
 
@@ -91,14 +88,14 @@ class OneFieldPopulator extends AbstractPopulator
         }
 
         $entityName = ClassUtils::getClass($entity);
-        if (!$this->indexManager->hasEntityIndexes($entityName)) {
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (!$this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || !$this->indexManager->hasEntityIndexes($class)) {
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
                 continue;
             }
 
@@ -109,7 +106,7 @@ class OneFieldPopulator extends AbstractPopulator
 
             foreach ($groupedContent as $group => $content) {
                 $entry = $this->entityManager->getRepository('whatwedoSearchBundle:Index')->findExisting($class, $group, $entity->{$idMethod}());
-                if (!$entry) {
+                if (! $entry) {
                     $insertData = [];
                     $insertSqlParts = [];
                     $insertData[] = $entity->{$idMethod}();
@@ -230,7 +227,6 @@ class OneFieldPopulator extends AbstractPopulator
         $content = [];
         /** @var \whatwedo\SearchBundle\Annotation\Index $index */
         foreach ($indexes as $field => $index) {
-
             $fieldMethod = $this->indexManager->getFieldAccessorMethod($entityName, $field);
 
             $formatter = $this->formatterManager->getFormatter($index->getFormatter());
@@ -239,6 +235,7 @@ class OneFieldPopulator extends AbstractPopulator
                 $content[$indexGroup][] = $formatter->getString($entity->{$fieldMethod}());
             }
         }
+
         return $content;
     }
 }
