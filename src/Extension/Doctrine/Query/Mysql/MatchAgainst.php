@@ -43,7 +43,7 @@ class MatchAgainst extends FunctionNode
 
     public $needle;
 
-    public $mode;
+    public $mode = 'IN BOOLEAN MODE';
 
     public function parse(Parser $parser): void
     {
@@ -80,8 +80,8 @@ class MatchAgainst extends FunctionNode
         $query = 'MATCH(' . $haystack .
             ') AGAINST (' . $this->needle->dispatch($sqlWalker);
 
-        if ($this->mode && $this->mode->value !== '') {
-            $query .= ' ' . trim($this->mode->dispatch($sqlWalker), "'") . ' )';
+        if ($this->mode && $this->mode !== '') {
+            $query .= ' ' . $this->mode . ' )';
         } else {
             $query .= ')';
         }

@@ -131,14 +131,12 @@ class IndexRepository extends ServiceEntityRepository
         $qb->addSelect('MATCH_AGAINST(i.content, :query) AS _matchQuote');
         $qb->addSelect('i.model');
         $qb->where('MATCH_AGAINST(i.content, :query) > :minScore');
-        $qb->orWhere('i.content LIKE :queryWildcard');
         $qb->groupBy('i.foreignId');
         $qb->addGroupBy('_matchQuote');
         $qb->addGroupBy('i.model');
         $qb->addOrderBy('_matchQuote', 'DESC');
-        $qb->setParameter('query', $query);
-        $qb->setParameter('queryWildcard', '%' . $query . '%');
-        $qb->setParameter('minScore', round(strlen($query) * 0.8));
+        $qb->setParameter('query', sprintf('*%s*', $query));
+        $qb->setParameter('minScore', 0);
 
         $ors = $qb->expr()->orX();
 
