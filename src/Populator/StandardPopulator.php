@@ -15,6 +15,7 @@ class StandardPopulator extends AbstractPopulator
 {
     public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
     {
+        $this->entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
         if ($this->disableEntityListener) {
             return;
         }

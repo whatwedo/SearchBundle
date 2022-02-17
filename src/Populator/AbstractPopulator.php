@@ -23,7 +23,6 @@ abstract class AbstractPopulator implements PopulatorInterface
         protected IndexManager $indexManager,
         protected FormatterManager $formatterManager
     ) {
-        $entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
         $this->output = new NullPopulateOutput();
     }
 
