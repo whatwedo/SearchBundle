@@ -19,9 +19,9 @@ class SearchManager
     /**
      * @return array|ResultItem[]
      */
-    public function search(string $searchTerm)
+    public function searchByEntites(string $searchTerm, array $entityFqcns = [], array $groups = [])
     {
-        $indexResults = $this->indexRepository->searchEntities($searchTerm);
+        $indexResults = $this->indexRepository->searchEntities($searchTerm, $entityFqcns, $groups);
         $groupedEntities = $this->loadEntities($indexResults);
         $entities = [];
 
@@ -30,7 +30,7 @@ class SearchManager
                 new ResultItem(
                     $searchResult['id'],
                     $searchResult['model'],
-                    $searchResult['_matchQuote'],
+                    (float) $searchResult['_matchQuote'],
                     $groupedEntities[$searchResult['model']][$searchResult['id']]
                 );
         }

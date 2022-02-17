@@ -36,7 +36,7 @@ trait SearchTrait
         }
         $searchTerm = $request->query->get('query');
 
-        $results = $searchManager->search($searchTerm);
+        $results = $searchManager->searchByEntites($searchTerm);
 
         $limit = $request->query->getInt('limit', 25);
 

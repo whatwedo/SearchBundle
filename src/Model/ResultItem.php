@@ -9,7 +9,7 @@ class ResultItem
     public function __construct(
         private int $id,
         private string $class,
-        private string $score,
+        private float $score,
         private $entity
     ) {
     }
@@ -24,7 +24,7 @@ class ResultItem
         return $this->class;
     }
 
-    public function getScore(): string
+    public function getScore(): float
     {
         return $this->score;
     }
