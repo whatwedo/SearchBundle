@@ -9,7 +9,7 @@ use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Populator\OneFieldPopulator;
 use whatwedo\SearchBundle\Populator\PopulatorInterface;
 
-class OneFieldPopulateTest extends AbstractSearchTest
+class OneFieldPopulateTest extends AbstractIndexTest
 {
 
 

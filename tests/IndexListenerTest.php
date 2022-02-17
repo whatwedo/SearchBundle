@@ -10,7 +10,7 @@ use whatwedo\SearchBundle\Tests\App\Entity\Company;
 use whatwedo\SearchBundle\Tests\App\Entity\Contact;
 use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 
-class IndexListenerTest extends AbstractSearchTest
+class IndexListenerTest extends AbstractIndexTest
 {
     public function testEntityCreation()
     {

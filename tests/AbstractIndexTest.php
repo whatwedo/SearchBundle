@@ -13,7 +13,7 @@ use whatwedo\SearchBundle\Tests\App\Factory\ContactFactory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
-abstract class AbstractSearchTest extends KernelTestCase
+abstract class AbstractIndexTest extends KernelTestCase
 {
     use Factories;
     use ResetDatabase;

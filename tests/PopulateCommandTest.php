@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\SearchBundle\Entity\Index;
 use Zenstruck\Console\Test\InteractsWithConsole;
 
-class PopulateCommandTest extends AbstractSearchTest
+class PopulateCommandTest extends AbstractIndexTest
 {
     use InteractsWithConsole;
 

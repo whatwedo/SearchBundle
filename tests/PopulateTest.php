@@ -13,7 +13,7 @@ use whatwedo\SearchBundle\Tests\App\Entity\Company;
 use whatwedo\SearchBundle\Tests\App\Entity\Person;
 use whatwedo\SearchBundle\Tests\App\Model\NotADoctrinieModel;
 
-class PopulateTest extends AbstractSearchTest
+class PopulateTest extends AbstractIndexTest
 {
     public function testPopulate()
     {
