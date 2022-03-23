@@ -13,4 +13,6 @@ class SearchOptions
     public const OPTION_GROUPS = 'groups';
 
     public const OPTION_STOP_WATCH = 'stop_watch';
+
+    public const OPTION_LINK_TRANSFORMER = 'link_transformer';
 }

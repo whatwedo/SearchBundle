@@ -6,13 +6,30 @@ namespace whatwedo\SearchBundle\Trait;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Stopwatch\Stopwatch;
 use whatwedo\SearchBundle\Manager\SearchManager;
 use whatwedo\SearchBundle\Model\ResultItem;
 
 trait SearchTrait
 {
+
+    private static $definitionManagerClass = 'whatwedo\CrudBundle\Manager\DefinitionManager';
+
     private array $searchOptions = [];
+
+    public static function getSubscribedServices(): array
+    {
+        if (method_exists(get_parent_class(self::class), 'getSubscribedServices')) {
+            $services = parent::getSubscribedServices();
+        } else {
+            $services = [];
+        }
+        if (class_exists(self::$definitionManagerClass)) {
+            $services = array_merge($services, [self::$definitionManagerClass,]);
+        }
+        return $services;
+    }
 
     /**
      * @return int[]
@@ -39,6 +56,21 @@ trait SearchTrait
         $resolver->setDefault(SearchOptions::OPTION_ENTITIES, []);
         $resolver->setDefault(SearchOptions::OPTION_GROUPS, []);
         $resolver->setDefault(SearchOptions::OPTION_STOP_WATCH, false);
+        $resolver->setDefault(SearchOptions::OPTION_LINK_TRANSFORMER, function (ResultItem $item) {
+            if (class_exists(self::$definitionManagerClass)) {
+                $definitionManager = $this->container->get(self::$definitionManagerClass);
+                $router = $this->container->get('router');
+                try {
+                    $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+                    return $router->generate($definition::getRoutePrefix() . '_show', [
+                        'id' => $item->getId(),
+                    ]);
+                } catch (\InvalidArgumentException|RouteNotFoundException $e) {
+                    // not found
+                }
+            }
+            return null;
+        });
 
         $this->searchOptions = $resolver->resolve($options);
 
@@ -76,11 +108,19 @@ trait SearchTrait
             'limit_choices' => $this->getLimitChoices(),
         ];
 
+        $linkTransform = new class($this->searchOptions[SearchOptions::OPTION_LINK_TRANSFORMER]) {
+            public function __construct(private $transformer) {}
+            public function uri(ResultItem $item) {
+                return ($this->transformer)($item);
+            }
+        };
+
         $templateParams = [
             'results' => $results,
             'pagination' => $pagination,
             'searchTerm' => $searchTerm,
             'duration' => $this->searchOptions[SearchOptions::OPTION_STOP_WATCH] ? $stopWatch->start('whatwedoSearch')->getDuration() : 0,
+            'linkTransform' => $linkTransform,
         ];
 
         return $templateParams;

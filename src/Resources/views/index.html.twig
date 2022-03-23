@@ -195,12 +195,17 @@
             {% for item in results %}
                 <tr class="whatwedo_table:table__row hover:bg-neutral-50 transition duration-500 color">
                     <td class="px-6 py-2 whitespace-nowrap text-neutral-900">
-                        <a href="/app_company/7">
-                            id: {{ item.id }} --
-                            class: {{ item.class }} --
-                            entity: {{ item.entity }} --
-                            score: {{ item.score }}
-                        </a>
+                        {% set item_uri = linkTransform.uri(item) %}
+                        {% if item_uri %}
+                            <a href="{{ item_uri }}">
+                        {% endif %}
+                        id: {{ item.id }} --
+                        class: {{ item.class }} --
+                        entity: {{ item.entity }} --
+                        score: {{ item.score }}
+                        {% if item_uri %}
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
