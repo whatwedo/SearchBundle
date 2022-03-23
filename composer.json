@@ -17,7 +17,7 @@
         "symfony/http-kernel": "~5.3|~6.0",
         "doctrine/annotations": "^1.13.2",
         "doctrine/orm": "2.11.0",
-        "whatwedo/core-bundle": "dev-1.0-dev as v1.0.0"
+        "whatwedo/core-bundle": "dev-feature/block_block as v1.0.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^v6.0",
