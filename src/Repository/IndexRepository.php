@@ -62,7 +62,7 @@ class IndexRepository extends ServiceEntityRepository
             ->addOrderBy('_matchQuote', 'DESC')
             ->setParameter('query', $query)
             ->setParameter('queryWildcard', '%' . $query . '%')
-            ->setParameter('minScore', round(\mb_strlen($query) * 0.8));
+            ->setParameter('minScore', 0);
 
         if ($entity) {
             $qb->andWhere('i.model = :entity')
