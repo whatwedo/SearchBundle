@@ -71,6 +71,21 @@ trait SearchTrait
             }
             return null;
         });
+        $resolver->setDefault(SearchOptions::OPTION_NAME_TRANSFORMER, function (ResultItem $item) {
+            return (string) $item->getEntity();
+        });
+        $resolver->setDefault(SearchOptions::OPTION_TYPE_TRANSFORMER, function (ResultItem $item) {
+            if (class_exists(self::$definitionManagerClass)) {
+                $definitionManager = $this->container->get(self::$definitionManagerClass);
+                try {
+                    $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+                    return $definition::getEntityTitle();
+                } catch (\InvalidArgumentException|RouteNotFoundException $e) {
+                    // not found
+                }
+            }
+            return basename($item->getClass());
+        });
 
         $this->searchOptions = $resolver->resolve($options);
 
@@ -108,10 +123,16 @@ trait SearchTrait
             'limit_choices' => $this->getLimitChoices(),
         ];
 
-        $linkTransform = new class($this->searchOptions[SearchOptions::OPTION_LINK_TRANSFORMER]) {
-            public function __construct(private $transformer) {}
+        $searchHelper = new class($this->searchOptions[SearchOptions::OPTION_LINK_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_NAME_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_TYPE_TRANSFORMER]) {
+            public function __construct(private $link, private $name, private $type) {}
             public function uri(ResultItem $item) {
-                return ($this->transformer)($item);
+                return ($this->link)($item);
+            }
+            public function name(ResultItem $item) {
+                return ($this->name)($item);
+            }
+            public function type(ResultItem $item) {
+                return ($this->type)($item);
             }
         };
 
@@ -120,7 +141,7 @@ trait SearchTrait
             'pagination' => $pagination,
             'searchTerm' => $searchTerm,
             'duration' => $this->searchOptions[SearchOptions::OPTION_STOP_WATCH] ? $stopWatch->start('whatwedoSearch')->getDuration() : 0,
-            'linkTransform' => $linkTransform,
+            'searchHelper' => $searchHelper,
         ];
 
         return $templateParams;

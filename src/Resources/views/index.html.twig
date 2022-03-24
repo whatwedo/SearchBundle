@@ -1,47 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ pagination.total }} Search Results for "{{ searchTerm }}" {% endblock %}
+{% block title %}{{ pagination.total }} {{ 'whatwedo_search.search_result_for' | trans }} "{{ searchTerm }}" {% endblock %}
 
 {% block main %}
-
     <div class="whatwedo_table:wrapper bg-white" data-controller="whatwedo--table-bundle--filter">
         <header class="whatwedo_table:header border-b border-neutral-200 px-4 py-4 sm:flex sm:items-center sm:justify-between">
             <div class="whatwedo_table:header__title flex-1 min-w-0 text-lg font-medium leading-6 text-neutral-900 sm:truncate">
                 <h1>
-                    {{ pagination.total }} Search Results for "{{ searchTerm }}"
+                    {{ pagination.total }} {{ 'whatwedo_search.search_result_for' | trans }} "{{ searchTerm }}"
                 </h1>
-
-
             </div>
-
             {% if duration %}
             ({{ duration }} ms)
             {% endif %}
-
         </header>
-
-
         {{ block('results') }}
         {{ block('pagination') }}
-
-
-
-
-
-
-
     </div>
-
 {% endblock %}
 
 {% block pagination %}
-
-
-
     {% set pageOffset = 5 %}
-
     {% set paginationLinks = [] %}
-
     {# first/previous #}
     {% if pagination.currentPage > 1 %}
         {#            {% set paginationLinks = paginationLinks|merge([{#}
@@ -168,8 +148,6 @@
             </div>
         </div>
     </footer>
-
-
 {% endblock %}
 
 {% block results %}
@@ -178,34 +156,53 @@
             <thead class="tableFloatingHeaderOriginal">
             <tr class="border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-500 text-left uppercase tracking-wider">
                 <th class="px-6 py-3">
-                    Name
+                    {{ 'whatwedo_search.type'  | trans }}
                 </th>
-
+                <th class="px-6 py-3">
+                    {{ 'whatwedo_search.name'  | trans }}
+                </th>
+                <th class="px-6 py-3">
+                    {{ 'whatwedo_search.score'  | trans }}
+                </th>
             </tr>
             </thead><thead class="tableFloatingHeader" style="display: none; opacity: 0;">
             <tr class="border-b border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-500 text-left uppercase tracking-wider">
                 <th class="px-6 py-3">
-                    Name
+                    {{ 'whatwedo_search.type'  | trans }}
                 </th>
-
+                <th class="px-6 py-3">
+                    {{ 'whatwedo_search.name'  | trans }}
+                </th>
+                <th class="px-6 py-3">
+                    {{ 'whatwedo_search.score'  | trans }}
+                </th>
             </tr>
             </thead>
             <tbody class="whatwedo_table:table__body bg-white text-sm text-neutral-500 font-medium divide-y divide-neutral-100">
 
             {% for item in results %}
                 <tr class="whatwedo_table:table__row hover:bg-neutral-50 transition duration-500 color">
-                    <td class="px-6 py-2 whitespace-nowrap text-neutral-900">
-                        {% set item_uri = linkTransform.uri(item) %}
+                    <td class="px-6 py-2 text-neutral-900">
+                        {% set item_uri = searchHelper.uri(item) %}
                         {% if item_uri %}
                             <a href="{{ item_uri }}">
                         {% endif %}
-                        id: {{ item.id }} --
-                        class: {{ item.class }} --
-                        entity: {{ item.entity }} --
-                        score: {{ item.score }}
+                        {{ searchHelper.type(item) | trans }}
                         {% if item_uri %}
                             </a>
                         {% endif %}
+                    </td>
+                    <td class="px-6 py-2 text-neutral-900">
+                        {% if item_uri %}
+                            <a href="{{ item_uri }}">
+                        {% endif %}
+                        {{ searchHelper.name(item) }}
+                        {% if item_uri %}
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-2">
+                        {{ item.score }}
                     </td>
                 </tr>
             {% endfor %}

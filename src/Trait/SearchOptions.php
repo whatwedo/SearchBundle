@@ -15,4 +15,8 @@ class SearchOptions
     public const OPTION_STOP_WATCH = 'stop_watch';
 
     public const OPTION_LINK_TRANSFORMER = 'link_transformer';
+
+    public const OPTION_NAME_TRANSFORMER = 'name_transformer';
+
+    public const OPTION_TYPE_TRANSFORMER = 'type_transformer';
 }

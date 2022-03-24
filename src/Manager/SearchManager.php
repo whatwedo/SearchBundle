@@ -71,4 +71,5 @@ class SearchManager
 
         return $groupedEntities;
     }
+
 }
