@@ -33,7 +33,8 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use whatwedo\SearchBundle\Annotation\Index;
+use whatwedo\SearchBundle\Annotation\Index as AttributeIndex;
+use whatwedo\SearchBundle\Entity\Index as EntityIndex;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
 class IndexManager
@@ -61,7 +62,7 @@ class IndexManager
     {
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
-        $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
+        $tableName = $this->getEntityManager()->getClassMetadata(EntityIndex::class)->getTableName();
         $query = $dbPlatform->getTruncateTableSql($tableName);
         $connection->executeStatement($query);
     }
@@ -80,7 +81,7 @@ class IndexManager
                 foreach ($this->config['entities'] as $entityConfig) {
                     if ($entityConfig['class'] === $entityFqcn) {
                         foreach ($entityConfig['fields'] as $fieldConfig) {
-                            $annotation = new Index();
+                            $annotation = new AttributeIndex();
                             if (isset($fieldConfig['formatter'])) {
                                 $annotation->setFormatter($fieldConfig['formatter']);
                             }
@@ -184,13 +185,13 @@ class IndexManager
             $this->annotationFields[$entityFqcn] = [];
             $reflection = new \ReflectionClass($entityFqcn);
             foreach ($reflection->getProperties() as $property) {
-                $annotation = $this->annotationReader->getPropertyAnnotation($property, Index::class);
+                $annotation = $this->annotationReader->getPropertyAnnotation($property, AttributeIndex::class);
                 if ($annotation !== null) {
                     $this->annotationFields[$entityFqcn][$property->getName()] = $annotation;
                 }
             }
             foreach ($reflection->getMethods() as $method) {
-                $annotation = $this->annotationReader->getMethodAnnotation($method, Index::class);
+                $annotation = $this->annotationReader->getMethodAnnotation($method, AttributeIndex::class);
                 if ($annotation !== null) {
                     $this->annotationFields[$entityFqcn][$method->getName()] = $annotation;
                 }
@@ -207,7 +208,7 @@ class IndexManager
         foreach ($reflection->getMethods() as $reflectionMethod) {
             $methodAttributes = $reflectionMethod->getAttributes();
             foreach ($methodAttributes as $attribute) {
-                if ($attribute->getName() === Index::class) {
+                if ($attribute->getName() === AttributeIndex::class) {
                     $fields[$reflectionMethod->getName()] = $attribute->newInstance();
                 }
             }
@@ -215,7 +216,7 @@ class IndexManager
         foreach ($reflection->getProperties() as $reflectionProperty) {
             $propertyAttributes = $reflectionProperty->getAttributes();
             foreach ($propertyAttributes as $attribute) {
-                if ($attribute->getName() === Index::class) {
+                if ($attribute->getName() === AttributeIndex::class) {
                     $fields[$reflectionProperty->getName()] = $attribute->newInstance();
                 }
             }

@@ -13,7 +13,6 @@ use whatwedo\SearchBundle\Model\ResultItem;
 
 trait SearchTrait
 {
-
     private static $definitionManagerClass = 'whatwedo\CrudBundle\Manager\DefinitionManager';
 
     private array $searchOptions = [];
@@ -26,8 +25,9 @@ trait SearchTrait
             $services = [];
         }
         if (class_exists(self::$definitionManagerClass)) {
-            $services = array_merge($services, [self::$definitionManagerClass,]);
+            $services = array_merge($services, [self::$definitionManagerClass]);
         }
+
         return $services;
     }
 
@@ -62,6 +62,7 @@ trait SearchTrait
                 $router = $this->container->get('router');
                 try {
                     $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+
                     return $router->generate($definition::getRoutePrefix() . '_show', [
                         'id' => $item->getId(),
                     ]);
@@ -69,6 +70,7 @@ trait SearchTrait
                     // not found
                 }
             }
+
             return null;
         });
         $resolver->setDefault(SearchOptions::OPTION_NAME_TRANSFORMER, function (ResultItem $item) {
@@ -79,11 +81,13 @@ trait SearchTrait
                 $definitionManager = $this->container->get(self::$definitionManagerClass);
                 try {
                     $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+
                     return $definition::getEntityTitle();
                 } catch (\InvalidArgumentException|RouteNotFoundException $e) {
                     // not found
                 }
             }
+
             return basename($item->getClass());
         });
 
@@ -124,14 +128,25 @@ trait SearchTrait
         ];
 
         $searchHelper = new class($this->searchOptions[SearchOptions::OPTION_LINK_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_NAME_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_TYPE_TRANSFORMER]) {
-            public function __construct(private $link, private $name, private $type) {}
-            public function uri(ResultItem $item) {
+            public function __construct(
+                private $link,
+                private $name,
+                private $type
+            ) {
+            }
+
+            public function uri(ResultItem $item)
+            {
                 return ($this->link)($item);
             }
-            public function name(ResultItem $item) {
+
+            public function name(ResultItem $item)
+            {
                 return ($this->name)($item);
             }
-            public function type(ResultItem $item) {
+
+            public function type(ResultItem $item)
+            {
                 return ($this->type)($item);
             }
         };

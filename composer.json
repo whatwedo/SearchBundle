@@ -16,16 +16,14 @@
         "symfony/framework-bundle": "~5.3|~6.0",
         "symfony/http-kernel": "~5.3|~6.0",
         "doctrine/annotations": "^1.13.2",
-        "doctrine/orm": "2.11.0",
+        "doctrine/orm": "^2.11.0",
         "whatwedo/core-bundle": "dev-1.0-dev"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^v6.0",
-        "symfony/http-kernel": "^v6.0",
         "symfony/config": "^v6.0",
         "symfony/dependency-injection": "^v6.0",
         "symfony/yaml": "^v6.0",
-        "symfony/framework-bundle": "^6.0",
         "symfony/validator": "^6.0",
         "nyholm/symfony-bundle-test": "^1.8",
         "doctrine/doctrine-bundle": "^2.5.5",
@@ -47,11 +45,11 @@
             "type": "package",
             "package": {
                 "name": "twbs/icons",
-                "version": "1.6.1",
+                "version": "1.8.1",
                 "source": {
                     "url": "https://github.com/twbs/icons",
                     "type": "git",
-                    "reference": "tags/v1.6.1"
+                    "reference": "tags/v1.8.1"
                 }
             }
         }
