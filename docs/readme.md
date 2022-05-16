@@ -112,7 +112,3 @@ Now you can use the Index repository to search in your entities
 
 That's it!
 
-### More resources
-
-- [Configuration](configuration.md)
-- [Indexing](indexing.md)
