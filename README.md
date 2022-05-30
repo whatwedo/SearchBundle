@@ -1,5 +1,5 @@
 [![Latest Stable Version](https://poser.pugx.org/whatwedo/search-bundle/v/stable)](https://packagist.org/packages/whatwedo/search-bundle)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/6e3545f5-a0af-4708-b330-5587b4ff6811/mini.png)](https://insight.sensiolabs.com/projects/6e3545f5-a0af-4708-b330-5587b4ff6811)
+[![SymfonyInsight](https://insight.symfony.com/projects/82c173ff-d154-4324-bf9b-ace64c689efd/mini.svg)](https://insight.symfony.com/projects/82c173ff-d154-4324-bf9b-ace64c689efd)
 
 # whatwedoSearchBundle
 
