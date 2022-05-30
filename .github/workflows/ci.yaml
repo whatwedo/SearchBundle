@@ -9,6 +9,13 @@ on:
 jobs:
     phpunit:
         runs-on: ubuntu-latest
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                ports:
+                    - 3306:3306
         steps:
             - uses: shivammathur/setup-php@2cb9b829437ee246e9b3cac53555a39208ca6d28
               with:
@@ -17,6 +24,4 @@ jobs:
             - name: Install Dependencies
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
             - name: Execute tests (Unit and Feature tests) via PHPUnit
-              env:
-                  DATABASE_URL: sqlite:///%kernel.project_dir%/var/app.db
               run: vendor/bin/simple-phpunit
