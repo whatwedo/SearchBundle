@@ -1,39 +1,58 @@
 # Getting Started
 
 This documentation provides a basic view of the possibilities of the whatwedoSearchBundle. 
-The documentation will be extended while developing the bundle.
 
 ## Requirements
 
-This bundle has been tested on PHP >= 7.0 and Symfony >= 3.0. 
+This bundle has been tested on PHP >= 8.1 and Symfony >= 6.0. 
 We don't guarantee that it works on lower versions.
-
 
 ## Installation
 
-First, add the bundle to your dependencies and install it.
+### Composer
+The bundle depends on bootstrap icons. To get them running smoothly in your project
+add this repository to you composer.json: ([Sadly composer cannot load repositories recursively](https://getcomposer.org/doc/faqs/why-cant-composer-load-repositories-recursively.md))
+```json
+"repositories": [
+    {
+        "type": "package",
+        "package": {
+            "name": "twbs/icons",
+            "version": "1.8.1",
+            "source": {
+                "url": "https://github.com/twbs/icons",
+                "type": "git",
+                "reference": "tags/v1.8.1"
+            }
+        }
+    }
+]
+```
+Then the bundle to your dependencies and install it.
 
 ```
 composer require whatwedo/search-bundle
 ```
+**TODO: remove after relase**
 
-Secondly, enable this bundle and the whatwedoSearchBundle in your kernel.
-
+The v3 version is still in developing,
+so you need to add these lines manually to the `composer.json` `require` to get the version constraint right:
+```json
+    ...
+    "whatwedo/search-bundle": "dev-3.0-dev as v3.0.0",
+    ...
 ```
-<?php
-// app/AppKernel.php
+Run `composer update`  
+After successfully installing the bundle, you should see changes in these files:
+ - `composer.json`
+ - `composer.lock`
+ - `package.json`
+ - `symfony.lock`
+ - `assets/controllers.json`
+ - `assets/bundles.php`
 
-public function registerBundles()
-{
-    $bundles = array(
-        // ...
-        new whatwedo\SearchBundle\whatwedoSearchBundle(),
-        // ...
-    );
-}
-```
-
-Doctrine does not support `MATCH AGAINST` per default. You can enable the it by adding the following lines to your `config.yml`
+### ORM
+Doctrine does not support `MATCH AGAINST` per default. You can enable it by adding the following lines to your `config/packages/doctrine.yaml`
 
 ```
 doctrine:
@@ -55,26 +74,29 @@ php bin/console doctrine:schema:update --force
 In your entities, you have to configure the indexed fields with the index annotation:
 
 ```
-// src/Agency/UserBundle/Entity/User.php
-
-// ...
-
 use Doctrine\ORM\Mapping as ORM;
 use whatwedo\SearchBundle\Annotation\Index;
 
-// ...
+#[ORM\Entity]
+class Post
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private $id;
 
-    /**
-     * @var string $firstname
-     * @ORM\Column(name="firstname", type="text"0)
-     * @Index()
-     */
-    protected $firstname;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Index]
+    private $title;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Index]
+    private $description;
     
 // ...
 ```
 
-Now and after every database change which are not performed by Doctrine, you have to update your index.
+Now and after every database change which are **not** performed by Doctrine, you have to update your index.
 
 Read more about populating your [here](indexing.md)
 
@@ -85,30 +107,42 @@ php bin/console whatwedo:search:populate
 Now you can use the Index repository to search in your entities
 
 ```
-// src/Agency/UserBundle/Controller/UserController.php
+use App\Entity\Post;
+use App\Repository\PostRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use whatwedo\SearchBundle\Repository\IndexRepository;
 
-// ...
-    public function searchAction($query)
+class DefaultController extends AbstractController
+{
+
+    #[Route('/', name: 'default')]
+    public function searchAction(IndexRepository $indexRepository, PostRepository $postRepository, ManagerRegistry $doctrine)
     {
-        // Get all id's of entities containing the query string
-        $ids = $this->em->getRepository('whatwedoSearchBundle:Index')->search($query, User::class);
-        
-        // Map users
-        $users = $this->em->getRepository('AgencyUserBundle:User')
-            ->createQueryBuilder('u')
-            ->where('u.id IN (:ids)')->setParameter('ids', $ids)
-            ->getQuery()
-            ->getResult();
-    
-        // Return view
-        return $this->render('search.html.twig', [
-            'users' => $users,
-        ]);
-    }
-    
-// ...
-```
+        // obtain query somehow
+        $query = '...';
 
+        // search specific entity class and map them to their object
+        $postIds = $indexRepository->search($query, Post::class);
+        $posts = $postRepository
+            ->createQueryBuilder('post')
+            ->where('post.id IN (:postIds)')
+            ->setParameter('postIds', $postIds)
+            ->getQuery()
+            ->getResult()
+        ;
+
+        // search all entity classes and map them to their object
+        $allIds = $indexRepository->searchEntities($query);
+        $all = array_map(function (array $result) use ($doctrine) {
+            return $doctrine
+                ->getRepository($result['model'])
+                ->find($result['id'])
+            ;
+        }, $allIds);
+        
+    }
+}
+```
 
 That's it!
 

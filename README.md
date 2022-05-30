@@ -14,8 +14,7 @@ Features include:
 
 ## Documentation
 
-The source of the documentation is stored in the `src/Resources/doc` folder. [Jump to the master documentation](src/Resources/doc/index.md)
-
+https://whatwedo.github.io/SearchBundle/#/
 
 ## License
 

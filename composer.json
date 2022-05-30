@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "Full text search on Doctrine entities without external dependencies.",
     "license": "MIT",
-    "homepage": "https://doc.whatwedo.ch/whatwedo/searchbundle",
+    "homepage": "https://whatwedo.github.io/SearchBundle/#/",
     "minimum-stability": "stable",
     "authors": [
         {
