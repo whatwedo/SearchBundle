@@ -61,7 +61,7 @@ class IndexManager
     {
         $connection = $this->getEntityManager()->getConnection();
         $dbPlatform = $connection->getDatabasePlatform();
-        $tableName = $this->getEntityManager()->getClassMetadata('whatwedoSearchBundle:Index')->getTableName();
+        $tableName = $this->getEntityManager()->getClassMetadata(\whatwedo\SearchBundle\Entity\Index::class)->getTableName();
         if ('mysql' === $connection->getDatabasePlatform()->getName()) {
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
         }
