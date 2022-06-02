@@ -33,7 +33,7 @@ Then the bundle to your dependencies and install it.
 ```
 composer require whatwedo/search-bundle
 ```
-**TODO: remove after relase**
+**remove after relase**
 
 The v3 version is still in developing,
 so you need to add these lines manually to the `composer.json` `require` to get the version constraint right:
