@@ -27,7 +27,6 @@ class Company
      * @ORM\Column(type="string")
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index()
      */
     #[Index(groups: ['default', 'company', 'global'])]
     private ?string $name = null;
@@ -36,7 +35,6 @@ class Company
      * @ORM\Column(type="string")
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index(formatter="whatwedo\SearchBundle\Tests\App\Formatter\DummyFormatter")
      */
     #[Index(formatter: 'whatwedo\SearchBundle\Tests\App\Formatter\DummyFormatter')]
     private ?string $city = null;
@@ -45,7 +43,6 @@ class Company
      * @ORM\Column(type="string")
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index()
      */
     #[Index]
     private ?string $country = null;
@@ -54,7 +51,6 @@ class Company
      * @ORM\Column(type="string")
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index()
      */
     #[Index]
     private ?string $taxIdentificationNumber = null;

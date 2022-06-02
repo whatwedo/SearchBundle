@@ -25,7 +25,6 @@ class Contact implements \Stringable
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank
      * @Assert\NotNull()
-     * @Index()
      */
     #[Index(groups: ['default', 'contacts', 'global'])]
     private ?string $name = null;

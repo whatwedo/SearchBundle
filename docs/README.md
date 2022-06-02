@@ -40,6 +40,7 @@ so you need to add these lines manually to the `composer.json` `require` to get 
 ```json
     ...
     "whatwedo/search-bundle": "dev-3.0-dev as v3.0.0",
+    "whatwedo/core-bundle": "dev-1.0-dev as v1.0.0",
     ...
 ```
 Run `composer update`  

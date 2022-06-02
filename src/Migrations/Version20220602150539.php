@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 /**
- * Copyright (c) 2016, whatwedo GmbH
+ * Copyright (c) 2022, whatwedo GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,47 +27,25 @@ declare(strict_types=1);
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace whatwedo\SearchBundle\Annotation;
+namespace whatwedo\SearchBundle\Migrations;
 
-use whatwedo\CoreBundle\Formatter\DefaultFormatter;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
 
-#[\Attribute]
-class Index
+final class Version20220602150539 extends AbstractMigration
 {
-    public function __construct(
-        public string $formatter = DefaultFormatter::class,
-        public array $groups = ['default'],
-        public array $formatterOptions = [
-        ]
-    ) {
+    public function getDescription(): string
+    {
+        return 'creates "whatwedo_search_index" table';
     }
 
-    public function getFormatter(): string
+    public function up(Schema $schema): void
     {
-        return $this->formatter;
+        $this->addSql('CREATE TABLE whatwedo_search_index (id BIGINT AUTO_INCREMENT NOT NULL, foreign_id INT NOT NULL, model VARCHAR(150) NOT NULL, grp VARCHAR(90) NOT NULL, content LONGTEXT NOT NULL, FULLTEXT INDEX IDX_38033FA6FEC530A9 (content), INDEX IDX_38033FA6D79572D9 (model), UNIQUE INDEX search_index (foreign_id, model, grp), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
     }
 
-    public function setFormatter(string $formatter): self
+    public function down(Schema $schema): void
     {
-        $this->formatter = $formatter;
-
-        return $this;
-    }
-
-    public function getFormatterOptions(): array
-    {
-        return $this->formatterOptions;
-    }
-
-    public function setFormatterOptions(array $formatterOptions): self
-    {
-        $this->formatterOptions = $formatterOptions;
-
-        return $this;
-    }
-
-    public function getGroups(): array
-    {
-        return $this->groups;
+        $this->addSql('DROP TABLE whatwedo_search_index');
     }
 }

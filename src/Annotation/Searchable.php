@@ -4,13 +4,6 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Annotation;
 
-use Doctrine\Common\Annotations\Annotation;
-
-/**
- * @Annotation
- * @NamedArgumentConstructor
- * @Target({"CLASS"})
- */
 #[\Attribute]
 class Searchable
 {
