@@ -43,11 +43,11 @@ class IndexManager
 
     protected array $config = [];
 
+    protected array $entityFields = [];
+
     private Reader $annotationReader;
 
     private array $annotationFields = [];
-
-    protected array $entityFields = [];
 
     public function __construct(
         ManagerRegistry $doctrine,
