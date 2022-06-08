@@ -47,6 +47,8 @@ class IndexManager
 
     private array $annotationFields = [];
 
+    protected array $entityFields = [];
+
     public function __construct(
         ManagerRegistry $doctrine,
         Reader $annotationReader

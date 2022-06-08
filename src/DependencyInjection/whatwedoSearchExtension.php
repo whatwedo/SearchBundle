@@ -45,6 +45,4 @@ class whatwedoSearchExtension extends Extension implements PrependExtensionInter
             ]),
         ]);
     }
-
-
 }

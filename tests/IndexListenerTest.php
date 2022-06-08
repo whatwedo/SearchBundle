@@ -17,7 +17,7 @@ class IndexListenerTest extends AbstractIndexTest
     {
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
-        $this->assertSame(0, $em->getRepository(Index::class)->count([]));
+        self::assertSame(0, $em->getRepository(Index::class)->count([]));
 
         /** @var Contact $contact */
         ContactFactory::createOne([
@@ -31,7 +31,7 @@ class IndexListenerTest extends AbstractIndexTest
         ])->object();
 
         $indexResults = $em->getRepository(Index::class)->findAll();
-        $this->assertSame(6, count($indexResults));
+        self::assertSame(6, count($indexResults));
 
         /** @var Index $indexResult */
         foreach ($indexResults as $indexResult) {
@@ -41,15 +41,13 @@ class IndexListenerTest extends AbstractIndexTest
                     case 'default':
                         $value = 'whatwedo GmbH dummy Switzerland 12344566';
                         break;
-                    case 'company':
-                        $value = 'whatwedo GmbH';
-                        break;
                     case 'global':
+                    case 'company':
                         $value = 'whatwedo GmbH';
                         break;
                 }
 
-                $this->assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
+                self::assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
             }
         }
     }
@@ -94,15 +92,13 @@ class IndexListenerTest extends AbstractIndexTest
                     case 'default':
                         $value = 'company dummy county 123456';
                         break;
-                    case 'company':
-                        $value = 'company';
-                        break;
                     case 'global':
+                    case 'company':
                         $value = 'company';
                         break;
                 }
 
-                $this->assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
+                self::assertSame($value, $indexResult->getContent(), 'test on group ' . $indexResult->getGroup() . ' failed');
             }
         }
     }
@@ -131,7 +127,7 @@ class IndexListenerTest extends AbstractIndexTest
 
         $indexResults = $em->getRepository(Index::class)->findAll();
 
-        $this->assertCount(6, $indexResults);
+        self::assertCount(6, $indexResults);
 
         $contact = $em->getRepository(Contact::class)->find($contactId);
         $em->remove($contact);
@@ -140,6 +136,6 @@ class IndexListenerTest extends AbstractIndexTest
 
         $indexResults = $em->getRepository(Index::class)->findAll();
 
-        $this->assertCount(0, $indexResults);
+        self::assertCount(0, $indexResults);
     }
 }

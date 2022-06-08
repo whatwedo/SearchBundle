@@ -18,7 +18,7 @@ class WiringTest extends KernelTestCase
             SearchManager::class,
             FilterManager::class,
         ] as $serviceClass) {
-            $this->assertInstanceOf(
+            self::assertInstanceOf(
                 $serviceClass,
                 self::getContainer()->get($serviceClass)
             );

@@ -26,7 +26,7 @@ class FilterConfigurationTest extends KernelTestCase
             $config
         );
 
-        $this->assertIsArray($processedConfiguration);
+        self::assertIsArray($processedConfiguration);
     }
 
     public function testFilterManagerConfig()
@@ -54,6 +54,6 @@ class FilterConfigurationTest extends KernelTestCase
             }
         }
 
-        $this->assertTrue(true);
+        self::assertTrue(true);
     }
 }

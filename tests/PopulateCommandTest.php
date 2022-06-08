@@ -23,7 +23,7 @@ class PopulateCommandTest extends AbstractIndexTest
             ->assertOutputContains('Entity\Contact')
         ;
 
-        $this->assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
+        self::assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 }

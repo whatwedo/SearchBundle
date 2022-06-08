@@ -27,7 +27,7 @@ abstract class AbstractIndexTest extends KernelTestCase
 
         ContactFactory::createMany(100);
 
-        $this->assertSame(10, $em->getRepository(Company::class)->count([]));
-        $this->assertSame(100, $em->getRepository(Contact::class)->count([]));
+        self::assertSame(10, $em->getRepository(Company::class)->count([]));
+        self::assertSame(100, $em->getRepository(Contact::class)->count([]));
     }
 }

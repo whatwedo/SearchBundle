@@ -19,7 +19,7 @@ class SearchTest extends AbstractSeaarchTest
 
         $result = $searchManager->searchByEntites('Mauri');
 
-        $this->assertSame(6, count($result));
+        self::assertSame(6, count($result));
     }
 
     public function testSearchEntity()
@@ -30,7 +30,7 @@ class SearchTest extends AbstractSeaarchTest
 
         $result = $searchManager->searchByEntites('Mauri', [Company::class]);
 
-        $this->assertSame(1, count($result));
+        self::assertSame(1, count($result));
     }
 
     public function testSearchGroup()
@@ -41,7 +41,7 @@ class SearchTest extends AbstractSeaarchTest
 
         $result = $searchManager->searchByEntites('Mauri', [], ['company']);
 
-        $this->assertSame(1, count($result));
+        self::assertSame(1, count($result));
     }
 
     protected function setUp(): void

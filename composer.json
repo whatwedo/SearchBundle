@@ -34,7 +34,8 @@
         "zenstruck/console-test": "^v1.1.0",
         "symfony/orm-pack": "^1.0",
         "symfony/translation": "^6.0",
-        "symfony/twig-bundle": "^6.0"
+        "symfony/twig-bundle": "^6.0",
+        "phpstan/phpstan": "^1.7"
     },
     "autoload": {
         "psr-4": {

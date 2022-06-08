@@ -14,7 +14,7 @@ class FilterTest extends TestCase
     {
         $filter = new LowerCaseFilter();
 
-        $this->assertSame([
+        self::assertSame([
             'data1',
             'data2',
         ], $filter->process([
@@ -27,14 +27,14 @@ class FilterTest extends TestCase
     {
         $filter = new RemoveFilter(['data1']);
 
-        $this->assertSame([
+        self::assertSame([
             'data2',
         ], $filter->process([
             'data1',
             'data2',
         ]));
 
-        $this->assertSame([
+        self::assertSame([
             'data3',
             'data2',
         ], $filter->process([

@@ -13,7 +13,7 @@ class TokenizerTest extends TestCase
     {
         $tokeizer = new StandardTokenizer();
 
-        $this->assertSame([
+        self::assertSame([
             'DATA1',
             'DaTa2',
         ], $tokeizer->tokenize('DATA1 DaTa2'));

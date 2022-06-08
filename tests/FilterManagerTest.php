@@ -26,7 +26,7 @@ class FilterManagerTest extends KernelTestCase
         $filter->setOptions([]);
         $filterManager->addFilter($filter, 'defaultChain');
 
-        $this->assertSame(
+        self::assertSame(
             'data1 data2',
             $filterManager->process('DATA1 DaTa2', 'defaultChain')
         );
@@ -41,7 +41,7 @@ class FilterManagerTest extends KernelTestCase
         $filter->setOptions([]);
         $filterManager->addFilter($filter, 'defaultChain');
 
-        $this->assertSame(
+        self::assertSame(
             'data1 data2',
             $filterManager->process('DATA1 DaTa2', 'defaultChain')
         );
@@ -54,7 +54,7 @@ class FilterManagerTest extends KernelTestCase
 
         $this->expectExceptionMessage('FilterChain "testChain" not configured');
 
-        $this->assertSame(
+        self::assertSame(
             'data1 data2',
             $filterManager->process('DATA1 DaTa2', 'testChain')
         );

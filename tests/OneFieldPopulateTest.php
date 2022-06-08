@@ -20,7 +20,7 @@ class OneFieldPopulateTest extends AbstractIndexTest
 
         $populator->populate();
 
-        $this->assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
+        self::assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 
@@ -28,7 +28,7 @@ class OneFieldPopulateTest extends AbstractIndexTest
     {
         $this->createEntities();
 
-        $this->assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
+        self::assertSame(330, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 
@@ -41,7 +41,7 @@ class OneFieldPopulateTest extends AbstractIndexTest
 
         $this->createEntities();
 
-        $this->assertSame(0, self::getContainer()->get(EntityManagerInterface::class)
+        self::assertSame(0, self::getContainer()->get(EntityManagerInterface::class)
             ->getRepository(Index::class)->count([]));
     }
 
