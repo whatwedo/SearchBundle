@@ -28,7 +28,7 @@
         "symfony/validator": "^6.0",
         "nyholm/symfony-bundle-test": "^1.8",
         "doctrine/doctrine-bundle": "^2.5.5",
-        "whatwedo/php-coding-standard": "dev-develop",
+        "whatwedo/php-coding-standard": "^1.0",
         "whatwedo/core-bundle": "dev-1.0-dev as 1.0",
         "zenstruck/foundry": "^1.16",
         "zenstruck/console-test": "^v1.1.0",
