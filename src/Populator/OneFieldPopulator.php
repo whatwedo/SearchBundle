@@ -131,8 +131,6 @@ class OneFieldPopulator extends AbstractPopulator
     /**
      * Populate index of given entity.
      *
-     * @param $entityName
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException

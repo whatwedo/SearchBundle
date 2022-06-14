@@ -43,14 +43,7 @@ class IndexRepository extends ServiceEntityRepository
         parent::__construct($registry, Index::class);
     }
 
-    /**
-     * @param $query
-     * @param string|null $entity
-     * @param string|null $group
-     *
-     * @return array
-     */
-    public function search($query, $entity = null, $group = null)
+    public function search($query, $entity = null, $group = null): array
     {
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
@@ -117,14 +110,10 @@ class IndexRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param $query
-     *
-     * @return array
-     *
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      */
-    public function searchEntities($query, array $entities = [], array $groups = [])
+    public function searchEntities($query, array $entities = [], array $groups = []): array
     {
         $qb = $this->createQueryBuilder('i');
         $qb->select('i.foreignId as id');
