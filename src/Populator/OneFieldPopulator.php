@@ -5,86 +5,22 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
-use Doctrine\DBAL\Connection;
 use whatwedo\SearchBundle\Entity\Index;
-use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
-use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class OneFieldPopulator extends AbstractPopulator
 {
-    public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
+    public function index(object $entity)
     {
-        $this->entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
-        if ($output) {
-            $this->output = $output;
-        }
-
-        $entities = $this->indexManager->getIndexedEntities();
-
-        // for example disable unwanted EventListeners
-        $this->prePopulate();
-
-        // Flush index
-        $this->output->log('Flushing index table');
-        $this->indexManager->flush();
-
-        if ($entityClass) {
-            $entityExists = $this->entityManager->getMetadataFactory()->isTransient($entityClass);
-            if ($entityExists) {
-                throw new ClassNotDoctrineMappedException($entityClass);
-            }
-
-            if ($entityClass && ! \in_array($entityClass, $entities, true)) {
-                throw new ClassNotIndexedEntityException($entityClass);
-            }
-        }
-
-        $this->output->log(sprintf('Index %s entites', count($entities)));
-        foreach ($entities as $entityName) {
-            if ($entityClass && $entityName !== str_replace('\\\\', '\\', $entityClass)) {
-                continue;
-            }
-            $this->indexEntity($entityName);
-        }
-    }
-
-    public function remove(object $entity): void
-    {
-        if ($this->entityWasRemoved($entity)) {
-            return;
-        }
-
         if ($this->disableEntityListener) {
             return;
         }
 
-        $entityName = ClassUtils::getClass($entity);
-        if (! $this->indexManager->hasEntityIndexes($entityName)) {
-            return;
-        }
-        $classes = $this->getClassTree($entityName);
-        foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
-                continue;
-            }
-            $idMethod = $this->indexManager->getIdMethod($entityName);
-            $this->delete((string) $entity->{$idMethod}(), $class);
-        }
-    }
-
-    public function index(object $entity)
-    {
         if ($entity instanceof Index) {
             return;
         }
 
         if ($this->entityWasIndexed($entity)) {
-            return;
-        }
-
-        if ($this->disableEntityListener) {
             return;
         }
 
@@ -124,10 +60,6 @@ class OneFieldPopulator extends AbstractPopulator
         }
     }
 
-    protected function prePopulate()
-    {
-    }
-
     /**
      * Populate index of given entity.
      *
@@ -142,8 +74,6 @@ class OneFieldPopulator extends AbstractPopulator
             return;
         }
 
-        /** @var Connection $connection */
-        $connection = $this->entityManager->getConnection();
         $this->output->log('Indexing of entity ' . $entityName);
 
         // Get required meta information

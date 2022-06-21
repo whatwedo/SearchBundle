@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Populator;
 
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
+use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
+use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
 abstract class AbstractPopulator implements PopulatorInterface
@@ -26,6 +29,70 @@ abstract class AbstractPopulator implements PopulatorInterface
         $this->output = new NullPopulateOutput();
     }
 
+    public function populate(?PopulateOutputInterface $output = null, ?string $entityClass = null): void
+    {
+        $this->entityManager->getConnection()->getConfiguration()->setSQLLogger(null);
+        if ($this->disableEntityListener) {
+            return;
+        }
+        if ($output) {
+            $this->output = $output;
+        }
+
+        $entities = $this->indexManager->getIndexedEntities();
+
+        // for example disable unwanted EventListeners
+        $this->prePopulate();
+
+        // Flush index
+        $this->output->log('Flushing index table');
+        $this->indexManager->flush();
+
+        if ($entityClass) {
+            $entityExists = $this->entityManager->getMetadataFactory()->isTransient($entityClass);
+            if ($entityExists) {
+                throw new ClassNotDoctrineMappedException($entityClass);
+            }
+
+            if ($entityClass && ! \in_array($entityClass, $entities, true)) {
+                throw new ClassNotIndexedEntityException($entityClass);
+            }
+        }
+
+        $this->output->log(sprintf('Index %s entites', count($entities)));
+        foreach ($entities as $entityName) {
+            if ($entityClass && $entityName !== str_replace('\\\\', '\\', $entityClass)) {
+                continue;
+            }
+            $this->indexEntity($entityName);
+        }
+    }
+
+    public function remove(object $entity): void
+    {
+        if ($this->entityWasRemoved($entity)) {
+            return;
+        }
+
+        if ($this->disableEntityListener) {
+            return;
+        }
+
+        $entityName = ClassUtils::getClass($entity);
+        if (! $this->indexManager->hasEntityIndexes($entityName)) {
+            return;
+        }
+        $classes = $this->getClassTree($entityName);
+        foreach ($classes as $class) {
+            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
+                || ! $this->indexManager->hasEntityIndexes($class)) {
+                continue;
+            }
+            $idMethod = $this->indexManager->getIdMethod($entityName);
+            $this->delete((string) $entity->{$idMethod}(), $class);
+        }
+    }
+
     public function disableEntityListener(bool $disable)
     {
         $this->disableEntityListener = $disable;
@@ -35,6 +102,12 @@ abstract class AbstractPopulator implements PopulatorInterface
     {
         $this->removeVisited = [];
         $this->indexVisited = [];
+    }
+
+    abstract protected function indexEntity($entityName);
+
+    protected function prePopulate()
+    {
     }
 
     protected function bulkInsert(array $insertSqlParts, array $insertData)
