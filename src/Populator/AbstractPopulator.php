@@ -10,6 +10,7 @@ use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
 use whatwedo\SearchBundle\Exception\ClassNotIndexedEntityException;
 use whatwedo\SearchBundle\Manager\IndexManager;
+use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 abstract class AbstractPopulator implements PopulatorInterface
 {
@@ -102,6 +103,41 @@ abstract class AbstractPopulator implements PopulatorInterface
     {
         $this->removeVisited = [];
         $this->indexVisited = [];
+    }
+
+    protected function getIndexEntityWorkingValues(string $entityName): array|false
+    {
+        $entityClass = new \ReflectionClass($entityName);
+        if ($entityClass->isAbstract()) {
+            return false;
+        }
+
+        $this->output->log('Indexing of entity ' . $entityName);
+
+        // Get required meta information
+        $indexes = $this->indexManager->getIndexesOfEntity($entityName);
+        $idMethod = $this->indexManager->getIdMethod($entityName);
+
+        $repository = $this->entityManager->getRepository($entityName);
+
+        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
+            $queryBuilder = $repository->getCustomSearchPopulateQueryBuilder();
+        } else {
+            // get clean QueryBuilder
+            $queryBuilder = $this->entityManager->createQueryBuilder();
+            $queryBuilder->from($entityName, 'e')->select('e');
+        }
+
+        $entities = $queryBuilder->getQuery()->iterate();
+        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
+            $entityCount = $repository->customSearchPopulateCount();
+        } else {
+            $entityCount = $this->entityManager->getRepository($entityName)->count([]);
+        }
+
+        $this->output->progressStart($entityCount * count($indexes));
+
+        return [$entities, $idMethod, $indexes];
     }
 
     abstract protected function indexEntity($entityName);

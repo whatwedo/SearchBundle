@@ -6,7 +6,6 @@ namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
 use whatwedo\SearchBundle\Entity\Index;
-use whatwedo\SearchBundle\Repository\CustomSearchPopulateQueryBuilderInterface;
 
 class OneFieldPopulator extends AbstractPopulator
 {
@@ -69,38 +68,9 @@ class OneFieldPopulator extends AbstractPopulator
      */
     protected function indexEntity($entityName)
     {
-        $entityClass = new \ReflectionClass($entityName);
-        if ($entityClass->isAbstract()) {
-            return;
-        }
-
-        $this->output->log('Indexing of entity ' . $entityName);
-
-        // Get required meta information
-        $indexes = $this->indexManager->getIndexesOfEntity($entityName);
-        $idMethod = $this->indexManager->getIdMethod($entityName);
-
-        $repository = $this->entityManager->getRepository($entityName);
-
-        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
-            $queryBuilder = $repository->getCustomSearchPopulateQueryBuilder();
-        } else {
-            // get clean QueryBuilder
-            $queryBuilder = $this->entityManager->createQueryBuilder();
-            $queryBuilder->from($entityName, 'e')->select('e');
-        }
-
-        $entities = $queryBuilder->getQuery()->iterate();
-        if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
-            $entityCount = $repository->customSearchPopulateCount();
-        } else {
-            $entityCount = $this->entityManager->getRepository($entityName)->count([]);
-        }
-
-        $this->output->progressStart($entityCount * count($indexes));
+        [$entities, $idMethod] = $this->getIndexEntityWorkingValues($entityName);
 
         $i = 0;
-
         $insertData = [];
         $insertSqlParts = [];
 
