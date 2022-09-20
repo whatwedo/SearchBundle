@@ -68,7 +68,11 @@ class OneFieldPopulator extends AbstractPopulator
      */
     protected function indexEntity($entityName)
     {
-        [$entities, $idMethod] = $this->getIndexEntityWorkingValues($entityName);
+        $workingValues = $this->getIndexEntityWorkingValues($entityName);
+        if ($workingValues === false) {
+            return;
+        }
+        [$entities, $idMethod] = $workingValues;
 
         $i = 0;
         $insertData = [];
