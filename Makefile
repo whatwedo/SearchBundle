@@ -31,7 +31,7 @@ ecs:
 
 ## check code with phpstan
 phpstan:
-	vendor/bin/phpstan
+	vendor/bin/phpstan --memory-limit=2G
 
 ## PHP Unit
 phpunit:
