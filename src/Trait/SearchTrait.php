@@ -61,7 +61,7 @@ trait SearchTrait
                 $definitionManager = $this->container->get(self::$definitionManagerClass);
                 $router = $this->container->get('router');
                 try {
-                    $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+                    $definition = $definitionManager->getDefinitionByEntity($item->getEntity());
 
                     return $router->generate($definition::getRoutePrefix() . '_show', [
                         'id' => $item->getId(),
@@ -80,7 +80,7 @@ trait SearchTrait
             if (class_exists(self::$definitionManagerClass)) {
                 $definitionManager = $this->container->get(self::$definitionManagerClass);
                 try {
-                    $definition = $definitionManager->getDefinitionByEntityClass($item->getClass());
+                    $definition = $definitionManager->getDefinitionByEntity($item->getEntity());
 
                     return $definition::getEntityTitle();
                 } catch (\InvalidArgumentException|RouteNotFoundException $e) {
