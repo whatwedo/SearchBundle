@@ -31,6 +31,7 @@ namespace whatwedo\SearchBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Persistence\ManagerRegistry;
 use whatwedo\SearchBundle\Annotation\Searchable;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Entity\PostSearchInterface;
@@ -38,13 +39,14 @@ use whatwedo\SearchBundle\Entity\PreSearchInterface;
 
 class IndexRepository extends ServiceEntityRepository
 {
-    public function __construct(\Doctrine\Persistence\ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Index::class);
     }
 
     public function search($query, $entity = null, $group = null): array
     {
+        $query = $this->queryEscape($query);
         $qb = $this->createQueryBuilder('i')
             ->select('i.foreignId')
             ->addSelect('MATCH_AGAINST(i.content, :query) AS _matchQuote')
@@ -115,6 +117,7 @@ class IndexRepository extends ServiceEntityRepository
      */
     public function searchEntities($query, array $entities = [], array $groups = []): array
     {
+        $query = $this->queryEscape($query);
         $qb = $this->createQueryBuilder('i');
         $qb->select('i.foreignId as id');
         $qb->addSelect('MATCH_AGAINST(i.content, :query) AS _matchQuote');
@@ -158,5 +161,13 @@ class IndexRepository extends ServiceEntityRepository
             ->setParameter('foreignId', $foreignId)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    protected function queryEscape(string $query): string
+    {
+        // Replace all non word characters with spaces
+        $query = preg_replace('/[^\p{L}\p{N}_]+/u', ' ', $query);
+        // Replace characters-operators with spaces
+        return preg_replace('/[+\-><\(\)~*\"@]+/', ' ', $query);
     }
 }
