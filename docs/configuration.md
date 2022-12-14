@@ -100,6 +100,29 @@ class User
 
 ```
 
+## Index groups
+
+You can define indexing groups and restrict search within these. If not specified the standard group is ```default```
+
+```
+#[Index groups: ['default', 'posts']]
+private $title;
+
+#[Index]
+private $description;
+```
+
+In the controller set which group(s) you want to include using ```SearchOptions::OPTION_GROUPS```
+
+```
+$searchParams = $this->getGlobalResults($request, $searchManager, [
+    SearchOptions::OPTION_GROUPS => [
+        'posts'
+    ],
+]);
+```
+
+
 The preSearch Hook 
 ```
 // src/Search/UserPreSearch.php
