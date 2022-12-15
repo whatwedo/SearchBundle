@@ -97,13 +97,16 @@ trait SearchTrait
             $stopWatch = new Stopwatch();
             $stopWatch->start('whatwedoSearch');
         }
-        $searchTerm = $request->query->get('query');
+        $searchTerm = $request->query->get('query', '');
 
-        $results = $searchManager->searchByEntites(
-            $searchTerm,
-            $this->searchOptions[SearchOptions::OPTION_ENTITIES],
-            $this->searchOptions[SearchOptions::OPTION_GROUPS]
-        );
+        $results = [];
+        if (!empty($searchTerm)) {
+            $results = $searchManager->searchByEntites(
+                $searchTerm,
+                $this->searchOptions[SearchOptions::OPTION_ENTITIES],
+                $this->searchOptions[SearchOptions::OPTION_GROUPS]
+            );
+        }
 
         $results = $this->orderResults($results);
 
