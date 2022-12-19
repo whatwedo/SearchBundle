@@ -100,7 +100,7 @@ trait SearchTrait
         $searchTerm = $request->query->get('query', '');
 
         $results = [];
-        if (!empty($searchTerm)) {
+        if (! empty($searchTerm)) {
             $results = $searchManager->searchByEntites(
                 $searchTerm,
                 $this->searchOptions[SearchOptions::OPTION_ENTITIES],
