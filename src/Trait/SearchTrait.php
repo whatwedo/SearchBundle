@@ -52,11 +52,11 @@ trait SearchTrait
     protected function getGlobalResults(Request $request, SearchManager $searchManager, $options = []): array
     {
         $resolver = new OptionsResolver();
-        $resolver->setDefault(SearchOptions::OPTION_ENTITY_ORDER, []);
-        $resolver->setDefault(SearchOptions::OPTION_ENTITIES, []);
-        $resolver->setDefault(SearchOptions::OPTION_GROUPS, []);
-        $resolver->setDefault(SearchOptions::OPTION_STOP_WATCH, false);
-        $resolver->setDefault(SearchOptions::OPTION_LINK_TRANSFORMER, function (ResultItem $item) {
+        $resolver->setDefault(Search::OPT_ENTITY_ORDER, []);
+        $resolver->setDefault(Search::OPT_ENTITIES, []);
+        $resolver->setDefault(Search::OPT_GROUPS, []);
+        $resolver->setDefault(Search::OPT_STOP_WATCH, false);
+        $resolver->setDefault(Search::OPT_LINK_TRANSFORMER, function (ResultItem $item) {
             if (class_exists(self::$definitionManagerClass)) {
                 $definitionManager = $this->container->get(self::$definitionManagerClass);
                 $router = $this->container->get('router');
@@ -73,10 +73,10 @@ trait SearchTrait
 
             return null;
         });
-        $resolver->setDefault(SearchOptions::OPTION_NAME_TRANSFORMER, function (ResultItem $item) {
+        $resolver->setDefault(Search::OPT_NAME_TRANSFORMER, function (ResultItem $item) {
             return (string) $item->getEntity();
         });
-        $resolver->setDefault(SearchOptions::OPTION_TYPE_TRANSFORMER, function (ResultItem $item) {
+        $resolver->setDefault(Search::OPT_TYPE_TRANSFORMER, function (ResultItem $item) {
             if (class_exists(self::$definitionManagerClass)) {
                 $definitionManager = $this->container->get(self::$definitionManagerClass);
                 try {
@@ -93,7 +93,7 @@ trait SearchTrait
 
         $this->searchOptions = $resolver->resolve($options);
 
-        if ($this->searchOptions[SearchOptions::OPTION_STOP_WATCH]) {
+        if ($this->searchOptions[Search::OPT_STOP_WATCH]) {
             $stopWatch = new Stopwatch();
             $stopWatch->start('whatwedoSearch');
         }
@@ -103,8 +103,8 @@ trait SearchTrait
         if (! empty($searchTerm)) {
             $results = $searchManager->searchByEntites(
                 $searchTerm,
-                $this->searchOptions[SearchOptions::OPTION_ENTITIES],
-                $this->searchOptions[SearchOptions::OPTION_GROUPS]
+                $this->searchOptions[Search::OPT_ENTITIES],
+                $this->searchOptions[Search::OPT_GROUPS]
             );
         }
 
@@ -130,7 +130,7 @@ trait SearchTrait
             'limit_choices' => $this->getLimitChoices(),
         ];
 
-        $searchHelper = new class($this->searchOptions[SearchOptions::OPTION_LINK_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_NAME_TRANSFORMER], $this->searchOptions[SearchOptions::OPTION_TYPE_TRANSFORMER]) {
+        $searchHelper = new class($this->searchOptions[Search::OPT_LINK_TRANSFORMER], $this->searchOptions[Search::OPT_NAME_TRANSFORMER], $this->searchOptions[Search::OPT_TYPE_TRANSFORMER]) {
             public function __construct(
                 private $link,
                 private $name,
@@ -158,7 +158,7 @@ trait SearchTrait
             'results' => $results,
             'pagination' => $pagination,
             'searchTerm' => $searchTerm,
-            'duration' => $this->searchOptions[SearchOptions::OPTION_STOP_WATCH] ? $stopWatch->start('whatwedoSearch')->getDuration() : 0,
+            'duration' => $this->searchOptions[Search::OPT_STOP_WATCH] ? $stopWatch->start('whatwedoSearch')->getDuration() : 0,
             'searchHelper' => $searchHelper,
         ];
 
@@ -167,12 +167,12 @@ trait SearchTrait
 
     private function orderResults(array $results): array
     {
-        if (count($this->searchOptions[SearchOptions::OPTION_ENTITY_ORDER]) > 0) {
+        if (count($this->searchOptions[Search::OPT_ENTITY_ORDER]) > 0) {
             $reorder = [];
 
             foreach ($results as $result) {
-                if (in_array($result->getClass(), $this->searchOptions[SearchOptions::OPTION_ENTITY_ORDER], true)) {
-                    $reorder[array_search($result->getClass(), $this->searchOptions[SearchOptions::OPTION_ENTITY_ORDER], true)][] = $result;
+                if (in_array($result->getClass(), $this->searchOptions[Search::OPT_ENTITY_ORDER], true)) {
+                    $reorder[array_search($result->getClass(), $this->searchOptions[Search::OPT_ENTITY_ORDER], true)][] = $result;
                 } else {
                     $reorder[999][] = $result;
                 }
