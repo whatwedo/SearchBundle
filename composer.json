@@ -13,8 +13,8 @@
     ],
     "require": {
         "php": ">=8.1",
-        "symfony/framework-bundle": "~5.3|~6.0",
-        "symfony/http-kernel": "~5.3|~6.0",
+        "symfony/framework-bundle": "^5.4|^6.0",
+        "symfony/http-kernel": "^5.4|^6.0",
         "doctrine/annotations": "^1.13.2",
         "doctrine/orm": "^2.11.0",
         "whatwedo/core-bundle": "^1.0",
