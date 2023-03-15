@@ -16,12 +16,9 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 // ...
 
-    /**
-     * @var string $firstname
-     * @ORM\Column(name="firstname", type="text"0)
-     * @Index()
-     */
-    protected $firstname;
+    #[ORM\Column(type: 'text', name='firstname')]
+    #[Index]
+    protected string $firstname;
     
 // ...
 ```
@@ -38,12 +35,9 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 // ...
 
-    /**
-     * @var string $createdAt
-     * @ORM\Column(name="created_at", type="text")
-     * @Index(formatter="whatwedo\CoreBundle\Formatter\DateTimeFormatter")
-     */
-    protected $createdAt;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, name="created_at")]
+    #[Index(formatter="whatwedo\CoreBundle\Formatter\DateTimeFormatter")]
+    protected DateTimeInterface $createdAt;
     
 // ...
 ```
@@ -60,11 +54,8 @@ use whatwedo\SearchBundle\Annotation\Index;
 
 // ...
 
-    /**
-     * @return string
-     * @Index()
-     */
-    public function getFullname()
+    #[Index]
+    public function getFullname(): string
     {
         return $this->firstname.' '.$this->lastname;
     }
@@ -86,13 +77,9 @@ use whatwedo\SearchBundle\Annotation\Searchable;
 // ...
 /**
  * Personen.
- *
- * @ORM\Table(name="user")
- * @Searchable(
- *     preSearch="App\Agency\Search\UserPreSearch"
- *     preSearch="App\Agency\Search\UserPostSearch"
- * )
  */
+ #[ORM\Table(name="users")]
+ #[Searchable([preSearch="App\Agency\Search\UserPreSearch", preSearch="App\Agency\Search\UserPostSearch"])]
 class User
 {
    // .....

@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\Populator;
 
 use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use whatwedo\SearchBundle\Entity\Index;
+use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
 class OneFieldPopulator extends AbstractPopulator
 {
@@ -62,9 +65,9 @@ class OneFieldPopulator extends AbstractPopulator
     /**
      * Populate index of given entity.
      *
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws MethodNotFoundException
      */
     protected function indexEntity($entityName)
     {

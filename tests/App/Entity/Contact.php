@@ -8,32 +8,25 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use whatwedo\SearchBundle\Annotation\Index;
 
-/**
- * @ORM\Table(name="contact")
- * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Tests\App\Repository\ContactRepository")
- */
+#[ORM\Table(name: 'contact')]
+#[ORM\Entity(repositoryClass: 'whatwedo\SearchBundle\Tests\App\Repository\ContactRepository')]
 class Contact implements \Stringable
 {
-    /**
-     * @ORM\Column(type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=50)
-     * @Assert\NotBlank
-     * @Assert\NotNull()
-     */
     #[Index(groups: ['default', 'contacts', 'global'])]
+    #[ORM\Column(type: 'string', length: 50)]
+    #[Assert\NotBlank]
+    #[Assert\NotNull]
     private ?string $name = null;
 
     /**
      * Many Groups have Many Members.
-     *
-     * @ORM\ManyToOne(targetEntity="Company", inversedBy="contacts")
      */
+    #[ORM\ManyToOne(targetEntity: 'Company', inversedBy: 'contacts')]
     private Company $company;
 
     public function __construct(Company $company)
