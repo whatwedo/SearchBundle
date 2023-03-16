@@ -21,7 +21,7 @@ doctrine:
         mappings:
           App:
             is_bundle: false
-            type: annotation
+            type: attribute
             dir: '%kernel.project_dir%/Entity'
             prefix: 'whatwedo\SearchBundle\Tests\App\Entity'
             alias: App
