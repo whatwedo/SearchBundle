@@ -30,6 +30,7 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Persistence\ManagerRegistry;
 use whatwedo\SearchBundle\Annotation\Searchable;
@@ -112,7 +113,7 @@ class IndexRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws AnnotationException
      * @throws \ReflectionException
      */
     public function searchEntities($query, array $entities = [], array $groups = []): array

@@ -2,23 +2,30 @@
 
 declare(strict_types=1);
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
+use whatwedo\CoreBundle\whatwedoCoreBundle;
+use whatwedo\SearchBundle\whatwedoSearchBundle;
+use Zenstruck\Foundry\ZenstruckFoundryBundle;
+
 return [
-    Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => [
+    FrameworkBundle::class => [
         'all' => true,
     ],
-    Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => [
+    DoctrineBundle::class => [
         'all' => true,
     ],
-    Symfony\Bundle\TwigBundle\TwigBundle::class => [
+    TwigBundle::class => [
         'all' => true,
     ],
-    Zenstruck\Foundry\ZenstruckFoundryBundle::class => [
+    ZenstruckFoundryBundle::class => [
         'all' => true,
     ],
-    whatwedo\CoreBundle\whatwedoCoreBundle::class => [
+    whatwedoCoreBundle::class => [
         'all' => true,
     ],
-    whatwedo\SearchBundle\whatwedoSearchBundle::class => [
+    whatwedoSearchBundle::class => [
         'all' => true,
     ],
 ];

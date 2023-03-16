@@ -31,63 +31,43 @@ namespace whatwedo\SearchBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Repository\IndexRepository")
- * @ORM\Table(
- *     name="whatwedo_search_index",
- *     indexes={
- *          @ORM\Index(columns={"content"}, flags={"fulltext"}),
- *          @ORM\Index(columns={"model"})
- *     },
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(
- *              name="search_index",
- *              columns={
- *                  "foreign_id",
- *                  "model",
- *                  "grp"
- *              }
- *          )
- *     }
- * )
- */
+#[ORM\Table(name: 'whatwedo_search_index')]
+#[ORM\Index(columns: ['content'], flags: ['fulltext'])]
+#[ORM\Index(columns: ['model'])]
+#[ORM\UniqueConstraint(name: 'search_index', columns: ['foreign_id', 'model', 'grp'])]
+#[ORM\Entity(repositoryClass: 'whatwedo\SearchBundle\Repository\IndexRepository')]
 class Index
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="bigint", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'bigint', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $id;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="foreign_id", type="integer", nullable=false)
      */
+    #[ORM\Column(name: 'foreign_id', type: 'integer', nullable: false)]
     protected $foreignId;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="model", type="string", length=150, nullable=false)
      */
+    #[ORM\Column(name: 'model', type: 'string', length: 150, nullable: false)]
     protected $model;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="grp", type="string", length=90, nullable=false)
      */
+    #[ORM\Column(name: 'grp', type: 'string', length: 90, nullable: false)]
     protected $group;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="content", type="text", nullable=false)
      */
+    #[ORM\Column(name: 'content', type: 'text', nullable: false)]
     protected $content;
 
     /**
