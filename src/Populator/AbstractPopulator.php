@@ -85,8 +85,7 @@ abstract class AbstractPopulator implements PopulatorInterface
         }
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
+            if (! $this->canBeIndexed($class)) {
                 continue;
             }
             $idMethod = $this->indexManager->getIdMethod($entityName);
@@ -103,6 +102,18 @@ abstract class AbstractPopulator implements PopulatorInterface
     {
         $this->removeVisited = [];
         $this->indexVisited = [];
+    }
+
+    protected function canBeIndexed(string $class): bool
+    {
+        if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)) {
+            return false;
+        }
+        $metadata = $this->entityManager->getClassMetadata($class);
+        if (! $this->indexManager->hasEntityIndexes($class) || $metadata->isMappedSuperclass) {
+            return false;
+        }
+        return true;
     }
 
     protected function getIndexEntityWorkingValues(string $entityName): array|false

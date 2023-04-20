@@ -122,7 +122,8 @@ class IndexManager
         /** @var ClassMetadata $metaTable */
         foreach ($metaTables as $metaTable) {
             $entity = $metaTable->getName();
-            if ($this->hasEntityIndexes($entity)) {
+            $classMeta = $this->getEntityManager()->getClassMetadata($entity);
+            if ($this->hasEntityIndexes($entity) && $classMeta->isMappedSuperclass === false) {
                 $tables[] = $entity;
             }
         }

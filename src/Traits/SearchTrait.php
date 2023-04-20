@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace whatwedo\SearchBundle\Trait;
+namespace whatwedo\SearchBundle\Traits;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\OptionsResolver\OptionsResolver;

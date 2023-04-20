@@ -33,8 +33,7 @@ class OneFieldPopulator extends AbstractPopulator
 
         $classes = $this->getClassTree($entityName);
         foreach ($classes as $class) {
-            if (! $this->entityManager->getMetadataFactory()->hasMetadataFor($class)
-                || ! $this->indexManager->hasEntityIndexes($class)) {
+            if (! $this->canBeIndexed($class)) {
                 continue;
             }
 
