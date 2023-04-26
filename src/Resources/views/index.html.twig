@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ pagination.total }} {{ 'whatwedo_search.search_result_for' | trans }} "{{ searchTerm }}" {% endblock %}
+{% block title %}{{ pagination.total }} {{ 'whatwedo_search.search_result_for' | trans }} "{{ searchTerm }}" {{ parent() }}{% endblock %}
 
 {% block main %}
     <div class="whatwedo_table:wrapper bg-white" data-controller="whatwedo--table-bundle--filter">
