@@ -3,18 +3,11 @@
 
 # whatwedoSearchBundle
 
-This bundle helps to automatically index and search entities.
-
-Features include:
-
-- Index entities
-- Search using match against
-- Formatters to help serialize the entity properties
-
+This bundle is part of the [araise.dev](https://araise.dev) framework.
 
 ## Documentation
 
-https://whatwedo.github.io/SearchBundle/#/
+[whatwedo.github.io/SearchBundle](https://whatwedo.github.io/SearchBundle/#/)
 
 ## License
 
