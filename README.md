@@ -1,3 +1,7 @@
+ATTENTION: This bundle is abandoned. It is now part of araise: https://github.com/araise-dev/SearchBundle
+
+---
+
 [![Latest Stable Version](https://poser.pugx.org/whatwedo/search-bundle/v/stable)](https://packagist.org/packages/whatwedo/search-bundle)
 [![SymfonyInsight](https://insight.symfony.com/projects/82c173ff-d154-4324-bf9b-ace64c689efd/mini.svg)](https://insight.symfony.com/projects/82c173ff-d154-4324-bf9b-ace64c689efd)
 
