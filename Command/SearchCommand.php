@@ -73,7 +73,7 @@ class SearchCommand extends BaseCommand
     /**
      * Configure command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('whatwedo:search:search')

@@ -73,7 +73,7 @@ class PopulateCommand extends BaseCommand
     /**
      * Configure command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('whatwedo:search:populate')
@@ -82,7 +82,7 @@ class PopulateCommand extends BaseCommand
             ->addArgument('entity', InputArgument::OPTIONAL, 'Only populate index for this entity');
     }
 
-    protected function prePopulate()
+    protected function prePopulate(): void
     {
     }
 
@@ -147,7 +147,7 @@ class PopulateCommand extends BaseCommand
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \whatwedo\SearchBundle\Exception\MethodNotFoundException
      */
-    protected function indexEntity($entityName)
+    protected function indexEntity($entityName): void
     {
         $entityClass = new \ReflectionClass($entityName);
         if ($entityClass->isAbstract()) {
@@ -238,7 +238,7 @@ class PopulateCommand extends BaseCommand
     }
 
 
-    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
+    private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection): void
     {
         $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
         $bulkInsertStatetment->execute($insertData);
@@ -247,7 +247,7 @@ class PopulateCommand extends BaseCommand
     /**
      * Clean up garbage.
      */
-    protected function gc()
+    protected function gc(): void
     {
         $this->em->clear();
         gc_collect_cycles();

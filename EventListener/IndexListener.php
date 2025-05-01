@@ -27,13 +27,18 @@
 
 namespace whatwedo\SearchBundle\EventListener;
 
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Statement;
+use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Manager\IndexManager;
 
+#[AsDoctrineListener(event: Events::postUpdate)]
+#[AsDoctrineListener(event: Events::postPersist)]
+#[AsDoctrineListener(event: Events::preRemove)]
 class IndexListener implements EventSubscriber
 {
     /**
@@ -82,7 +87,7 @@ class IndexListener implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             'postPersist',
@@ -91,17 +96,17 @@ class IndexListener implements EventSubscriber
         ];
     }
 
-    public function postPersist(LifecycleEventArgs $args)
+    public function postPersist(LifecycleEventArgs $args): void
     {
         $this->index($args);
     }
 
-    public function postUpdate(LifecycleEventArgs $args)
+    public function postUpdate(LifecycleEventArgs $args): void
     {
         $this->index($args);
     }
 
-    public function preRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args): void
     {
         $em = $args->getObjectManager();
         $entity = $args->getObject();
@@ -136,7 +141,7 @@ class IndexListener implements EventSubscriber
         $em->flush();
     }
 
-    public function index(LifecycleEventArgs $args)
+    public function index(LifecycleEventArgs $args): void
     {
         $em = $args->getObjectManager();
         if (null === $this->indexInsertStmt) {
@@ -210,7 +215,7 @@ class IndexListener implements EventSubscriber
      *
      * @return array
      */
-    protected function getClassTree($className)
+    protected function getClassTree($className): array
     {
         $classes = class_parents($className);
         array_unshift($classes, $className);
