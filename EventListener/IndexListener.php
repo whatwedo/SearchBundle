@@ -197,11 +197,11 @@ class IndexListener implements EventSubscriber
                         $this->indexInsertStmt->bindValue(2, $class);
                         $this->indexInsertStmt->bindValue(3, $field);
                         $this->indexInsertStmt->bindValue(4, $content);
-                        $this->indexInsertStmt->execute();
+                        $this->indexInsertStmt->executeQuery();
                     } else {
                         $this->indexUpdateStmt->bindValue(1, $content);
                         $this->indexUpdateStmt->bindValue(2, $entry->getId());
-                        $this->indexUpdateStmt->execute();
+                        $this->indexUpdateStmt->executeQuery();
                     }
                 }
             }
