@@ -29,7 +29,6 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Manager;
 
-use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
@@ -45,16 +44,10 @@ class IndexManager
 
     protected array $entityFields = [];
 
-    private Reader $annotationReader;
-
-    private array $annotationFields = [];
-
     public function __construct(
-        ManagerRegistry $doctrine,
-        Reader $annotationReader
+        ManagerRegistry $doctrine
     ) {
         $this->doctrine = $doctrine;
-        $this->annotationReader = $annotationReader;
     }
 
     /**
@@ -75,8 +68,7 @@ class IndexManager
     public function getIndexesOfEntity(string $entityFqcn): array
     {
         if (! isset($this->entityFields[$entityFqcn])) {
-            $fields = $this->getAnnotationFields($entityFqcn);
-            $fields = array_merge($fields, $this->getAttrubuteFields($entityFqcn));
+            $fields = $this->getAttributeFields($entityFqcn);
 
             // Check if entities exists
             if (isset($this->config['entities'])) {
@@ -182,29 +174,7 @@ class IndexManager
         return $this->doctrine->getManager();
     }
 
-    protected function getAnnotationFields(string $entityFqcn): array
-    {
-        if (! isset($this->annotationFields[$entityFqcn])) {
-            $this->annotationFields[$entityFqcn] = [];
-            $reflection = new \ReflectionClass($entityFqcn);
-            foreach ($reflection->getProperties() as $property) {
-                $annotation = $this->annotationReader->getPropertyAnnotation($property, AttributeIndex::class);
-                if ($annotation !== null) {
-                    $this->annotationFields[$entityFqcn][$property->getName()] = $annotation;
-                }
-            }
-            foreach ($reflection->getMethods() as $method) {
-                $annotation = $this->annotationReader->getMethodAnnotation($method, AttributeIndex::class);
-                if ($annotation !== null) {
-                    $this->annotationFields[$entityFqcn][$method->getName()] = $annotation;
-                }
-            }
-        }
-
-        return $this->annotationFields[$entityFqcn];
-    }
-
-    protected function getAttrubuteFields(string $entity): array
+    protected function getAttributeFields(string $entity): array
     {
         $fields = [];
         $reflection = new \ReflectionClass($entity);
