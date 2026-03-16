@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Populator;
 
-use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\Proxy;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Exception\MethodNotFoundException;
 
@@ -26,7 +26,7 @@ class StandardPopulator extends AbstractPopulator
             return;
         }
 
-        $entityName = ClassUtils::getClass($entity);
+        $entityName = $entity instanceof Proxy ? get_parent_class($entity) : get_class($entity);
         if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }

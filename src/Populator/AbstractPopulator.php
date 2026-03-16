@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace whatwedo\SearchBundle\Populator;
 
-use Doctrine\Common\Util\ClassUtils;
+use Doctrine\Persistence\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use whatwedo\CoreBundle\Manager\FormatterManager;
 use whatwedo\SearchBundle\Exception\ClassNotDoctrineMappedException;
@@ -78,7 +78,7 @@ abstract class AbstractPopulator implements PopulatorInterface
             return;
         }
 
-        $entityName = ClassUtils::getClass($entity);
+        $entityName = $entity instanceof Proxy ? get_parent_class($entity) : get_class($entity);
         if (! $this->indexManager->hasEntityIndexes($entityName)) {
             return;
         }
