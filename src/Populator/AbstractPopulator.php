@@ -138,7 +138,7 @@ abstract class AbstractPopulator implements PopulatorInterface
             $queryBuilder->from($entityName, 'e')->select('e');
         }
 
-        $entities = $queryBuilder->getQuery()->iterate();
+        $entities = $queryBuilder->getQuery()->toIterable();
         if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
             $entityCount = $repository->customSearchPopulateCount();
         } else {
