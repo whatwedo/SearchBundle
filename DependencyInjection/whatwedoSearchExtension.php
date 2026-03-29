@@ -16,7 +16,7 @@ use whatwedo\SearchBundle\Manager\IndexManager;
  */
 class whatwedoSearchExtension extends Extension
 {
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);

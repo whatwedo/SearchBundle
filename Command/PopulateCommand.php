@@ -170,7 +170,7 @@ class PopulateCommand extends BaseCommand
         }
 
         // Get entities
-        $entities = $queryBuilder->getQuery()->iterate();
+        $entities = $queryBuilder->getQuery()->toIterable();
         if ($repository instanceof CustomSearchPopulateQueryBuilderInterface) {
             $entityCount = $repository->customSearchPopulateCount();
         } else {
@@ -195,11 +195,11 @@ class PopulateCommand extends BaseCommand
                 // Get content
                 $formatter = $this->formatterManager->getFormatter($index->getFormatter());
                 $formatter->processOptions($index->getFormatterOptions());
-                $content = $formatter->getString($entity[0]->$fieldMethod());
+                $content = $formatter->getString($entity->$fieldMethod());
 
                 // Persist entry
                 if (!empty($content)) {
-                    $insertData[] = $entity[0]->$idMethod();
+                    $insertData[] = $entity->$idMethod();
                     $insertData[] = $entityName;
                     $insertData[] = $field;
                     $insertData[] = (string)$content;
