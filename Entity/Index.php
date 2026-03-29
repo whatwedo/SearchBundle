@@ -28,79 +28,46 @@
 namespace whatwedo\SearchBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use whatwedo\SearchBundle\Repository\IndexRepository;
 
-/**
- * @ORM\Entity(repositoryClass="whatwedo\SearchBundle\Repository\IndexRepository")
- * @ORM\Table(
- *     name="whatwedo_search_index",
- *     indexes={
- *          @ORM\Index(columns={"content"}, flags={"fulltext"}),
- *          @ORM\Index(columns={"model"})
- *     },
- *     uniqueConstraints={
- *          @ORM\UniqueConstraint(
- *              name="search_index",
- *              columns={
- *                  "foreign_id",
- *                  "model",
- *                  "field"
- *              }
- *          )
- *     }
- * )
- */
+#[ORM\Entity(repositoryClass: IndexRepository::class)]
+#[ORM\Table(
+    name: 'whatwedo_search_index',
+    indexes: [
+        new ORM\Index(columns: ['content'], flags: ['fulltext']),
+        new ORM\Index(columns: ['model']),
+    ],
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(
+            name: 'search_index',
+            columns: ['foreign_id', 'model', 'field']
+        ),
+    ]
+)]
 class Index
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="bigint", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'bigint', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $id;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="foreign_id", type="integer", nullable=false)
-     */
+    #[ORM\Column(name: 'foreign_id', type: 'integer', nullable: false)]
     protected $foreignId;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="model", type="string", length=150, nullable=false)
-     */
+    #[ORM\Column(name: 'model', type: 'string', length: 150, nullable: false)]
     protected $model;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="field", type="string", length=90, nullable=false)
-     */
+    #[ORM\Column(name: 'field', type: 'string', length: 90, nullable: false)]
     protected $field;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="content", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'content', type: 'text', nullable: false)]
     protected $content;
 
-    /**
-     * @return int
-     */
     public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     *
-     * @return self
-     */
     public function setId($id)
     {
         $this->id = $id;
@@ -108,19 +75,11 @@ class Index
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getForeignId()
     {
         return $this->foreignId;
     }
 
-    /**
-     * @param int $foreignId
-     *
-     * @return self
-     */
     public function setForeignId($foreignId)
     {
         $this->foreignId = $foreignId;
@@ -128,19 +87,11 @@ class Index
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getModel()
     {
         return $this->model;
     }
 
-    /**
-     * @param string $model
-     *
-     * @return self
-     */
     public function setModel($model)
     {
         $this->model = $model;
@@ -148,19 +99,11 @@ class Index
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getField()
     {
         return $this->field;
     }
 
-    /**
-     * @param string $field
-     *
-     * @return self
-     */
     public function setField($field)
     {
         $this->field = $field;
@@ -168,19 +111,11 @@ class Index
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getContent()
     {
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     *
-     * @return self
-     */
     public function setContent($content)
     {
         $this->content = $content;
