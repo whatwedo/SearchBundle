@@ -81,11 +81,11 @@ class OneFieldPopulator extends AbstractPopulator
         $insertSqlParts = [];
 
         foreach ($entities as $entity) {
-            $groupedContent = $this->collectEntityIndexData($entityName, $entity[0]);
+            $groupedContent = $this->collectEntityIndexData($entityName, $entity);
 
             // Persist entry
             foreach ($groupedContent as $group => $content) {
-                $insertData[] = $entity[0]->{$idMethod}();
+                $insertData[] = $entity->{$idMethod}();
                 $insertData[] = $entityName;
                 $insertData[] = $group;
                 $insertData[] = implode(' ', $content);

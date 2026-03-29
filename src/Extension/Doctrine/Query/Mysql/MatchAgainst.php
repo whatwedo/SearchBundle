@@ -30,9 +30,9 @@ declare(strict_types=1);
 namespace whatwedo\SearchBundle\Extension\Doctrine\Query\Mysql;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
-use Doctrine\ORM\Query\Lexer;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\Query\SqlWalker;
+use Doctrine\ORM\Query\TokenType;
 
 class MatchAgainst extends FunctionNode
 {
@@ -47,21 +47,21 @@ class MatchAgainst extends FunctionNode
 
     public function parse(Parser $parser): void
     {
-        $parser->match(Lexer::T_IDENTIFIER);
-        $parser->match(Lexer::T_OPEN_PARENTHESIS);
+        $parser->match(TokenType::T_IDENTIFIER);
+        $parser->match(TokenType::T_OPEN_PARENTHESIS);
 
         do {
             $this->columns[] = $parser->StateFieldPathExpression();
-            $parser->match(Lexer::T_COMMA);
-        } while ($parser->getLexer()->isNextToken(Lexer::T_IDENTIFIER));
+            $parser->match(TokenType::T_COMMA);
+        } while ($parser->getLexer()->isNextToken(TokenType::T_IDENTIFIER));
 
         $this->needle = $parser->InParameter();
 
-        while ($parser->getLexer()->isNextToken(Lexer::T_STRING)) {
+        while ($parser->getLexer()->isNextToken(TokenType::T_STRING)) {
             $this->mode = $parser->Literal();
         }
 
-        $parser->match(Lexer::T_CLOSE_PARENTHESIS);
+        $parser->match(TokenType::T_CLOSE_PARENTHESIS);
     }
 
     public function getSql(SqlWalker $sqlWalker): string
