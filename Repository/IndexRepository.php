@@ -28,7 +28,6 @@
 namespace whatwedo\SearchBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Annotations\AnnotationReader;
 use whatwedo\SearchBundle\Annotation\Searchable;
 use whatwedo\SearchBundle\Entity\Index;
 use whatwedo\SearchBundle\Entity\PostSearchInterface;
@@ -75,10 +74,10 @@ class IndexRepository extends ServiceEntityRepository
         if ($entity) {
             // preSearch
             $reflection = new \ReflectionClass($entity);
-            $annotationReader = new AnnotationReader();
 
-            /** @var Searchable $searchableAnnotations */
-            $searchableAnnotations = $annotationReader->getClassAnnotation($reflection, Searchable::class);
+            $searchableAttributes = $reflection->getAttributes(Searchable::class);
+            /** @var Searchable|null $searchableAnnotations */
+            $searchableAnnotations = !empty($searchableAttributes) ? $searchableAttributes[0]->newInstance() : null;
 
             if ($searchableAnnotations) {
                 $class = $searchableAnnotations->getPreSearch();

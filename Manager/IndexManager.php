@@ -27,7 +27,6 @@
 
 namespace whatwedo\SearchBundle\Manager;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
@@ -66,7 +65,7 @@ class IndexManager
             $connection->query('SET FOREIGN_KEY_CHECKS=0');
         }
         $query = $dbPlatform->getTruncateTableSql($tableName);
-        $connection->executeUpdate($query);
+        $connection->executeStatement($query);
         if ('mysql' === $connection->getDatabasePlatform()->getName()) {
             $connection->query('SET FOREIGN_KEY_CHECKS=1');
         }
@@ -83,17 +82,16 @@ class IndexManager
     {
         $fields = [];
         $reflection = new \ReflectionClass($entity);
-        $annotationReader = new AnnotationReader();
         foreach ($reflection->getProperties() as $property) {
-            $annotation = $annotationReader->getPropertyAnnotation($property, Index::class);
-            if (null !== $annotation) {
-                $fields[$property->getName()] = $annotation;
+            $attributes = $property->getAttributes(Index::class);
+            if (!empty($attributes)) {
+                $fields[$property->getName()] = $attributes[0]->newInstance();
             }
         }
         foreach ($reflection->getMethods() as $method) {
-            $annotation = $annotationReader->getMethodAnnotation($method, Index::class);
-            if (null !== $annotation) {
-                $fields[$method->getName()] = $annotation;
+            $attributes = $method->getAttributes(Index::class);
+            if (!empty($attributes)) {
+                $fields[$method->getName()] = $attributes[0]->newInstance();
             }
         }
 

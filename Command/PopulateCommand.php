@@ -93,9 +93,6 @@ class PopulateCommand extends BaseCommand
         $this->em = $this->doctrine->getManager();
         $entities = $this->indexManager->getIndexedEntities();
 
-        // Disable SQL logging
-        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
-
         // for example disable unwanted EventListeners
         $this->prePopulate();
 
@@ -240,8 +237,10 @@ class PopulateCommand extends BaseCommand
 
     private function bulkInsert(array $insertSqlParts, array $insertData, \Doctrine\DBAL\Connection $connection)
     {
-        $bulkInsertStatetment = $connection->prepare('INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts));
-        $bulkInsertStatetment->execute($insertData);
+        $connection->executeStatement(
+            'INSERT INTO whatwedo_search_index (foreign_id, model, field, content) VALUES ' . implode(',', $insertSqlParts),
+            $insertData
+        );
     }
 
     /**
